@@ -3,6 +3,7 @@ import { formatMoney, formatPercent, formatSignedMoney } from "../format";
 
 interface Props {
   holdings: Holding[];
+  onDeleteClick: (holding: Holding) => void;
 }
 
 function changeClass(value: number | null): string {
@@ -10,7 +11,28 @@ function changeClass(value: number | null): string {
   return value >= 0 ? "positive" : "negative";
 }
 
-export function HoldingsGrid({ holdings }: Props) {
+function TrashIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  );
+}
+
+export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
   if (holdings.length === 0) {
     return (
       <div className="empty-state">
@@ -27,8 +49,9 @@ export function HoldingsGrid({ holdings }: Props) {
           <th>Shares</th>
           <th>Avg Cost</th>
           <th>Price</th>
-          <th>Today's Change</th>
-          <th>Market Value</th>
+          <th>Today's Change (CAD)</th>
+          <th>Market Value (CAD)</th>
+          <th aria-hidden="true"></th>
         </tr>
       </thead>
       <tbody>
@@ -36,7 +59,7 @@ export function HoldingsGrid({ holdings }: Props) {
           <tr key={h.symbol}>
             <td className="symbol-cell">
               {h.symbol}
-              {h.currency && h.currency !== "USD" && (
+              {h.currency && h.currency !== "CAD" && (
                 <span className="currency-tag">{h.currency}</span>
               )}
             </td>
@@ -49,14 +72,24 @@ export function HoldingsGrid({ holdings }: Props) {
                 formatMoney(h.price, h.currency)
               )}
             </td>
-            <td className={changeClass(h.dayChangeDollar)}>
-              {h.priceUnavailable
+            <td className={changeClass(h.dayChangeDollarCad)}>
+              {h.dayChangeDollarCad === null
                 ? "—"
-                : `${formatSignedMoney(h.dayChangeDollar, h.currency)} (${formatPercent(
+                : `${formatSignedMoney(h.dayChangeDollarCad, "CAD")} (${formatPercent(
                     h.dayChangePercent
                   )})`}
             </td>
-            <td>{formatMoney(h.marketValue, h.currency)}</td>
+            <td>{formatMoney(h.marketValueCad, "CAD")}</td>
+            <td>
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label={`Remove ${h.symbol}`}
+                onClick={() => onDeleteClick(h)}
+              >
+                <TrashIcon />
+              </button>
+            </td>
           </tr>
         ))}
       </tbody>

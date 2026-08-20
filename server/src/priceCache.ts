@@ -1,5 +1,6 @@
 import { db, rollUpStaleIntradayPrices } from "./db.js";
 import { fetchQuotes, type Quote } from "./priceFetcher.js";
+import { refreshExchangeRate } from "./exchangeRate.js";
 
 interface CachedQuote extends Quote {
   fetchedAt: string;
@@ -24,9 +25,14 @@ export async function refreshAllPrices(): Promise<void> {
   rollUpStaleIntradayPrices();
 
   const symbols = listHeldSymbols();
-  if (symbols.length === 0) return;
+  const rateRefresh = refreshExchangeRate();
 
-  const quotes = await fetchQuotes(symbols);
+  if (symbols.length === 0) {
+    await rateRefresh;
+    return;
+  }
+
+  const [quotes] = await Promise.all([fetchQuotes(symbols), rateRefresh]);
   const now = new Date().toISOString();
 
   for (const [symbol, quote] of quotes) {

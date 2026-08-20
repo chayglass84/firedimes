@@ -5,11 +5,11 @@ export interface Holding {
   price: number | null;
   currency: string | null;
   priceUnavailable: boolean;
-  marketValue: number | null;
-  costBasis: number;
-  totalGainDollar: number | null;
+  marketValueCad: number | null;
+  costBasisCad: number | null;
+  totalGainDollarCad: number | null;
   totalGainPercent: number | null;
-  dayChangeDollar: number | null;
+  dayChangeDollarCad: number | null;
   dayChangePercent: number | null;
   lastUpdated: string | null;
 }

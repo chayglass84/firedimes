@@ -2,9 +2,10 @@ import { useState, type FormEvent } from "react";
 
 interface Props {
   onAdd: (symbol: string, shares: number, price: number) => Promise<void>;
+  onCancel: () => void;
 }
 
-export function AddHoldingForm({ onAdd }: Props) {
+export function AddHoldingForm({ onAdd, onCancel }: Props) {
   const [symbol, setSymbol] = useState("");
   const [shares, setShares] = useState("");
   const [price, setPrice] = useState("");
@@ -19,17 +20,13 @@ export function AddHoldingForm({ onAdd }: Props) {
     setBusy(true);
     try {
       await onAdd(symbol.trim().toUpperCase(), sharesNum, priceNum);
-      setSymbol("");
-      setShares("");
-      setPrice("");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <form className="panel" onSubmit={handleSubmit}>
-      <h2>Add / Buy More</h2>
+    <form onSubmit={handleSubmit}>
       <div className="field-row">
         <div className="field">
           <label htmlFor="add-symbol">Symbol</label>
@@ -39,6 +36,7 @@ export function AddHoldingForm({ onAdd }: Props) {
             onChange={(e) => setSymbol(e.target.value)}
             placeholder="AAPL"
             autoComplete="off"
+            autoFocus
           />
         </div>
         <div className="field">
@@ -65,6 +63,11 @@ export function AddHoldingForm({ onAdd }: Props) {
             placeholder="150.00"
           />
         </div>
+      </div>
+      <div className="modal-actions">
+        <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={busy}>
+          Cancel
+        </button>
         <button className="btn btn-add" type="submit" disabled={busy}>
           {busy ? "Adding…" : "Add"}
         </button>

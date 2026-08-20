@@ -5,70 +5,54 @@ interface Props {
   holdings: Holding[];
 }
 
-interface CurrencyTotals {
-  currency: string;
-  marketValue: number;
-  costBasis: number;
-  totalGainDollar: number;
-  dayChangeDollar: number;
-}
-
-function groupByCurrency(holdings: Holding[]): CurrencyTotals[] {
-  const groups = new Map<string, CurrencyTotals>();
-  for (const h of holdings) {
-    const currency = h.currency ?? "?";
-    const g = groups.get(currency) ?? {
-      currency,
-      marketValue: 0,
-      costBasis: 0,
-      totalGainDollar: 0,
-      dayChangeDollar: 0,
-    };
-    g.marketValue += h.marketValue ?? 0;
-    g.costBasis += h.costBasis;
-    g.totalGainDollar += h.totalGainDollar ?? 0;
-    g.dayChangeDollar += h.dayChangeDollar ?? 0;
-    groups.set(currency, g);
-  }
-  return [...groups.values()];
-}
-
 export function SummaryStrip({ holdings }: Props) {
   if (holdings.length === 0) return null;
 
-  const groups = groupByCurrency(holdings);
+  let totalValue = 0;
+  let totalCostBasis = 0;
+  let totalGain = 0;
+  let totalDayChange = 0;
+  let missingCount = 0;
+
+  for (const h of holdings) {
+    if (h.marketValueCad === null || h.costBasisCad === null) {
+      missingCount++;
+      continue;
+    }
+    totalValue += h.marketValueCad;
+    totalCostBasis += h.costBasisCad;
+    totalGain += h.totalGainDollarCad ?? 0;
+    totalDayChange += h.dayChangeDollarCad ?? 0;
+  }
+
+  const totalGainPercent = totalCostBasis > 0 ? (totalGain / totalCostBasis) * 100 : null;
 
   return (
-    <div className="summary-strip">
-      {groups.map((g) => (
-        <div className="summary-card" key={g.currency}>
-          <div className="label">
-            Total Value{groups.length > 1 ? ` (${g.currency})` : ""}
-          </div>
-          <div className="value">{formatMoney(g.marketValue, g.currency)}</div>
+    <div>
+      <div className="summary-strip">
+        <div className="summary-card">
+          <div className="label">Total Value (CAD)</div>
+          <div className="value">{formatMoney(totalValue, "CAD")}</div>
         </div>
-      ))}
-      {groups.map((g) => (
-        <div className="summary-card" key={`today-${g.currency}`}>
-          <div className="label">
-            Today's Change{groups.length > 1 ? ` (${g.currency})` : ""}
-          </div>
-          <div className={`value ${g.dayChangeDollar >= 0 ? "positive" : "negative"}`}>
-            {formatSignedMoney(g.dayChangeDollar, g.currency)}
+        <div className="summary-card">
+          <div className="label">Today's Change (CAD)</div>
+          <div className={`value ${totalDayChange >= 0 ? "positive" : "negative"}`}>
+            {formatSignedMoney(totalDayChange, "CAD")}
           </div>
         </div>
-      ))}
-      {groups.map((g) => (
-        <div className="summary-card" key={`gain-${g.currency}`}>
-          <div className="label">
-            Total Gain{groups.length > 1 ? ` (${g.currency})` : ""}
-          </div>
-          <div className={`value ${g.totalGainDollar >= 0 ? "positive" : "negative"}`}>
-            {formatSignedMoney(g.totalGainDollar, g.currency)} (
-            {formatPercent(g.costBasis > 0 ? (g.totalGainDollar / g.costBasis) * 100 : null)})
+        <div className="summary-card">
+          <div className="label">Total Gain (CAD)</div>
+          <div className={`value ${totalGain >= 0 ? "positive" : "negative"}`}>
+            {formatSignedMoney(totalGain, "CAD")} ({formatPercent(totalGainPercent)})
           </div>
         </div>
-      ))}
+      </div>
+      {missingCount > 0 && (
+        <p className="fx-caveat">
+          {missingCount} holding{missingCount > 1 ? "s" : ""} excluded from totals — price or
+          exchange rate not yet available.
+        </p>
+      )}
     </div>
   );
 }

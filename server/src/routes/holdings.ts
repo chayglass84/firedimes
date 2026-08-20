@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "../db.js";
 import { getCachedQuote, refreshAllPrices } from "../priceCache.js";
+import { convertToCad } from "../exchangeRate.js";
 
 export const holdingsRouter = Router();
 
@@ -20,15 +21,22 @@ function serializeHolding(row: HoldingRow) {
 
   const marketValue = price !== null ? price * row.shares : null;
   const costBasis = row.avg_cost * row.shares;
-  const totalGainDollar = marketValue !== null ? marketValue - costBasis : null;
-  const totalGainPercent = costBasis > 0 && totalGainDollar !== null ? (totalGainDollar / costBasis) * 100 : null;
+  const totalGainPercent =
+    costBasis > 0 && marketValue !== null ? ((marketValue - costBasis) / costBasis) * 100 : null;
 
-  const dayChangeDollar =
-    price !== null && previousClose !== null ? (price - previousClose) * row.shares : null;
   const dayChangePercent =
     price !== null && previousClose !== null && previousClose !== 0
       ? ((price - previousClose) / previousClose) * 100
       : null;
+  const dayChangeDollarNative =
+    price !== null && previousClose !== null ? (price - previousClose) * row.shares : null;
+
+  const marketValueCad = marketValue !== null ? convertToCad(marketValue, currency) : null;
+  const costBasisCad = convertToCad(costBasis, currency);
+  const totalGainDollarCad =
+    marketValueCad !== null && costBasisCad !== null ? marketValueCad - costBasisCad : null;
+  const dayChangeDollarCad =
+    dayChangeDollarNative !== null ? convertToCad(dayChangeDollarNative, currency) : null;
 
   return {
     symbol: row.symbol,
@@ -37,11 +45,11 @@ function serializeHolding(row: HoldingRow) {
     price,
     currency,
     priceUnavailable: quote === undefined,
-    marketValue,
-    costBasis,
-    totalGainDollar,
+    marketValueCad,
+    costBasisCad,
+    totalGainDollarCad,
     totalGainPercent,
-    dayChangeDollar,
+    dayChangeDollarCad,
     dayChangePercent,
     lastUpdated: quote?.fetchedAt ?? null,
   };
