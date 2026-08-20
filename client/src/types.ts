@@ -7,6 +7,7 @@ export interface Holding {
   symbol: string;
   shares: number;
   avgCost: number;
+  analystTargetPrice: number | null;
   price: number | null;
   currency: string | null;
   instrumentType: string | null;

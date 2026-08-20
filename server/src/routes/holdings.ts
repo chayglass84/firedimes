@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "../db.js";
-import { getCachedQuote, refreshAllPrices } from "../priceCache.js";
+import { getAnalystTarget, getCachedQuote, refreshAllPrices } from "../priceCache.js";
 import { convertToCad } from "../exchangeRate.js";
 
 export const holdingsRouter = Router();
@@ -43,6 +43,7 @@ function serializeHolding(row: HoldingRow) {
     symbol: row.symbol,
     shares: row.shares,
     avgCost: row.avg_cost,
+    analystTargetPrice: getAnalystTarget(row.symbol) ?? null,
     price,
     currency,
     instrumentType,

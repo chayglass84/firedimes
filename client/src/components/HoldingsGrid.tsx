@@ -7,7 +7,14 @@ interface Props {
   onDeleteClick: (holding: Holding) => void;
 }
 
-type SortKey = "symbol" | "price" | "shares" | "avgCost" | "dayChangeDollarCad" | "marketValueCad";
+type SortKey =
+  | "symbol"
+  | "price"
+  | "shares"
+  | "avgCost"
+  | "analystTargetPrice"
+  | "dayChangeDollarCad"
+  | "marketValueCad";
 type SortDir = "asc" | "desc";
 
 interface Column {
@@ -21,6 +28,7 @@ const COLUMNS: Column[] = [
   { key: "price", label: "Price", defaultDir: "desc" },
   { key: "shares", label: "Shares", defaultDir: "desc" },
   { key: "avgCost", label: "Avg Cost", defaultDir: "desc" },
+  { key: "analystTargetPrice", label: "Analyst Forecast", defaultDir: "desc" },
   { key: "dayChangeDollarCad", label: "Today's Change (CAD)", defaultDir: "desc" },
   { key: "marketValueCad", label: "Market Value (CAD)", defaultDir: "desc" },
 ];
@@ -46,6 +54,8 @@ function sortValue(h: Holding, key: SortKey): string | number | null {
       return h.shares;
     case "avgCost":
       return h.avgCost;
+    case "analystTargetPrice":
+      return h.analystTargetPrice;
     case "dayChangeDollarCad":
       return h.dayChangeDollarCad;
     case "marketValueCad":
@@ -158,6 +168,13 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
             </td>
             <td>{h.shares}</td>
             <td>{formatMoney(h.avgCost, h.currency)}</td>
+            <td>
+              {h.analystTargetPrice === null ? (
+                <span className="muted">n/a</span>
+              ) : (
+                formatMoney(h.analystTargetPrice, h.currency)
+              )}
+            </td>
             <td className={changeClass(h.dayChangeDollarCad)}>
               {h.dayChangeDollarCad === null
                 ? "—"
