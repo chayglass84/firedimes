@@ -51,8 +51,8 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
     <table className="holdings-grid">
       <thead>
         <tr>
-          <th>Price</th>
           <th>Symbol</th>
+          <th>Price</th>
           <th>Shares</th>
           <th>Avg Cost</th>
           <th>Today's Change (CAD)</th>
@@ -63,6 +63,7 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
       <tbody>
         {holdings.map((h) => (
           <tr key={h.symbol}>
+            <td className="symbol-cell">{h.symbol}</td>
             <td>
               {h.priceUnavailable ? (
                 <span className="muted">unavailable</span>
@@ -75,7 +76,6 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
                 </>
               )}
             </td>
-            <td className="symbol-cell">{h.symbol}</td>
             <td>{h.shares}</td>
             <td>{formatMoney(h.avgCost, h.currency)}</td>
             <td className={changeClass(h.dayChangeDollarCad)}>
