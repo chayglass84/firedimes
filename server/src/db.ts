@@ -34,6 +34,17 @@ db.exec(`
     currency TEXT,
     PRIMARY KEY (symbol, date)
   );
+
+  CREATE TABLE IF NOT EXISTS portfolio_intraday (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    total_value_cad REAL NOT NULL,
+    captured_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS portfolio_daily_history (
+    date TEXT PRIMARY KEY,
+    close_value_cad REAL NOT NULL
+  );
 `);
 
 /**
@@ -77,6 +88,42 @@ export function rollUpStaleIntradayPrices(): void {
         closePrice: row.price,
         currency: row.currency,
       });
+    }
+    deleteStale.run(today);
+  });
+  tx();
+}
+
+/** Same idea as rollUpStaleIntradayPrices, but for the whole-portfolio value series. */
+export function rollUpStalePortfolioSnapshots(): void {
+  const today = new Date().toISOString().slice(0, 10);
+
+  const staleGroups = db
+    .prepare(
+      `SELECT substr(captured_at, 1, 10) AS date, MAX(captured_at) AS lastCapturedAt
+       FROM portfolio_intraday
+       WHERE substr(captured_at, 1, 10) < ?
+       GROUP BY date`
+    )
+    .all(today) as { date: string; lastCapturedAt: string }[];
+
+  const upsertDaily = db.prepare(
+    `INSERT INTO portfolio_daily_history (date, close_value_cad)
+     VALUES (@date, @closeValueCad)
+     ON CONFLICT(date) DO UPDATE SET close_value_cad = excluded.close_value_cad`
+  );
+  const findValue = db.prepare(
+    `SELECT total_value_cad FROM portfolio_intraday WHERE captured_at = ?`
+  );
+  const deleteStale = db.prepare(
+    `DELETE FROM portfolio_intraday WHERE substr(captured_at, 1, 10) < ?`
+  );
+
+  const tx = db.transaction(() => {
+    for (const group of staleGroups) {
+      const row = findValue.get(group.lastCapturedAt) as { total_value_cad: number } | undefined;
+      if (!row) continue;
+      upsertDaily.run({ date: group.date, closeValueCad: row.total_value_cad });
     }
     deleteStale.run(today);
   });

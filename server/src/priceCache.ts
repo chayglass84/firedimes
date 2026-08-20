@@ -1,6 +1,7 @@
-import { db, rollUpStaleIntradayPrices } from "./db.js";
+import { db, rollUpStaleIntradayPrices, rollUpStalePortfolioSnapshots } from "./db.js";
 import { fetchQuotes, type Quote } from "./priceFetcher.js";
 import { refreshExchangeRate } from "./exchangeRate.js";
+import { computeTotalPortfolioValueCad } from "./portfolioValue.js";
 
 interface CachedQuote extends Quote {
   fetchedAt: string;
@@ -20,9 +21,13 @@ function listHeldSymbols(): string[] {
 const insertIntraday = db.prepare(
   `INSERT INTO intraday_prices (symbol, price, currency, captured_at) VALUES (?, ?, ?, ?)`
 );
+const insertPortfolioSnapshot = db.prepare(
+  `INSERT INTO portfolio_intraday (total_value_cad, captured_at) VALUES (?, ?)`
+);
 
 export async function refreshAllPrices(): Promise<void> {
   rollUpStaleIntradayPrices();
+  rollUpStalePortfolioSnapshots();
 
   const symbols = listHeldSymbols();
   const rateRefresh = refreshExchangeRate();
@@ -39,6 +44,11 @@ export async function refreshAllPrices(): Promise<void> {
     if (!quote) continue;
     cache.set(symbol, { ...quote, fetchedAt: now });
     insertIntraday.run(symbol, quote.price, quote.currency, now);
+  }
+
+  const totalValueCad = computeTotalPortfolioValueCad(getCachedQuote);
+  if (totalValueCad !== null) {
+    insertPortfolioSnapshot.run(totalValueCad, now);
   }
 }
 

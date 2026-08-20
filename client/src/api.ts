@@ -1,4 +1,4 @@
-import type { Holding } from "./types";
+import type { Holding, PortfolioPoint } from "./types";
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -30,4 +30,10 @@ export function removeShares(symbol: string, shares: number): Promise<{ deleted?
 
 export function refreshPrices(): Promise<void> {
   return fetch("/api/refresh", { method: "POST" }).then((res) => handle(res));
+}
+
+export function fetchPortfolioHistory(range: string): Promise<PortfolioPoint[]> {
+  return fetch(`/api/portfolio-history?range=${encodeURIComponent(range)}`).then((res) =>
+    handle<PortfolioPoint[]>(res)
+  );
 }

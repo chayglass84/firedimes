@@ -1,3 +1,8 @@
+export interface PortfolioPoint {
+  t: string;
+  v: number;
+}
+
 export interface Holding {
   symbol: string;
   shares: number;

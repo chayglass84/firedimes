@@ -4,6 +4,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { holdingsRouter } from "./routes/holdings.js";
+import { portfolioHistoryRouter } from "./routes/portfolioHistory.js";
 import { refreshAllPrices, startPricePolling } from "./priceCache.js";
 import { getExchangeRateState } from "./exchangeRate.js";
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/holdings", holdingsRouter);
+app.use("/api/portfolio-history", portfolioHistoryRouter);
 
 app.post("/api/refresh", async (_req, res) => {
   await refreshAllPrices();

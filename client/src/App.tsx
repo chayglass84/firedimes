@@ -5,6 +5,8 @@ import { AddHoldingForm } from "./components/AddHoldingForm";
 import { ConfirmRemoveModal } from "./components/ConfirmRemoveModal";
 import { HoldingsGrid } from "./components/HoldingsGrid";
 import { Modal } from "./components/Modal";
+import { PerformanceChartCard } from "./components/PerformanceChartCard";
+import { SplitPane } from "./components/SplitPane";
 import { SummaryStrip } from "./components/SummaryStrip";
 
 const POLL_INTERVAL_MS = 10 * 60 * 1000;
@@ -15,6 +17,7 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<Holding | null>(null);
+  const [chartRefreshSignal, setChartRefreshSignal] = useState(0);
 
   const load = useCallback(async () => {
     try {
@@ -60,6 +63,7 @@ export default function App() {
     try {
       await refreshPrices();
       await load();
+      setChartRefreshSignal((n) => n + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to refresh prices");
     } finally {
@@ -77,6 +81,27 @@ export default function App() {
       </header>
 
       {error && <div className="error-banner">{error}</div>}
+
+      <SplitPane
+        defaultLeftPercent={66.7}
+        left={
+          <PerformanceChartCard
+            title="Overall Performance"
+            filterable
+            defaultRange="1m"
+            pollMs={POLL_INTERVAL_MS}
+            refreshSignal={chartRefreshSignal}
+          />
+        }
+        right={
+          <PerformanceChartCard
+            title="Daily Performance"
+            fixedRange="1d"
+            pollMs={POLL_INTERVAL_MS}
+            refreshSignal={chartRefreshSignal}
+          />
+        }
+      />
 
       <SummaryStrip holdings={holdings} />
 
