@@ -28,7 +28,7 @@ const COLUMNS: Column[] = [
   { key: "price", label: "Price", defaultDir: "desc" },
   { key: "shares", label: "Shares", defaultDir: "desc" },
   { key: "avgCost", label: "Avg Cost", defaultDir: "desc" },
-  { key: "analystTargetPrice", label: "Analyst Forecast", defaultDir: "desc" },
+  { key: "analystTargetPrice", label: "Forecast", defaultDir: "desc" },
   { key: "dayChangeDollarCad", label: "Today's Change (CAD)", defaultDir: "desc" },
   { key: "marketValueCad", label: "Market Value (CAD)", defaultDir: "desc" },
 ];

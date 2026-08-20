@@ -50,11 +50,11 @@ async function requestTarget(symbol: string, s: YahooSession): Promise<number | 
 
   if (!result) return "unauthorized";
 
-  const target = result?.financialData?.targetMeanPrice?.raw;
+  const target = result?.financialData?.targetMedianPrice?.raw;
   return typeof target === "number" ? target : null;
 }
 
-/** Average analyst 12-month price target for a symbol, in its native currency. Null if unavailable (e.g. ETFs, thinly-covered stocks). */
+/** Median analyst 12-month price target for a symbol, in its native currency. Null if unavailable (e.g. ETFs, thinly-covered stocks). */
 export async function fetchAnalystTargetPrice(symbol: string): Promise<number | null> {
   if (!session) {
     session = await establishSession();

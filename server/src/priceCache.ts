@@ -14,12 +14,17 @@ export function getCachedQuote(symbol: string): CachedQuote | undefined {
   return cache.get(symbol.toUpperCase());
 }
 
-// Analyst targets move rarely, so unlike price we fetch each symbol once
-// and keep it for the life of the server rather than every 10-min cycle.
-const analystTargetCache = new Map<string, number | null>();
+// Analyst targets move rarely, so unlike price we only re-check each
+// symbol once a day rather than every 10-min cycle.
+interface CachedTarget {
+  value: number | null;
+  fetchedDate: string; // YYYY-MM-DD
+}
+
+const analystTargetCache = new Map<string, CachedTarget>();
 
 export function getAnalystTarget(symbol: string): number | null | undefined {
-  return analystTargetCache.get(symbol.toUpperCase());
+  return analystTargetCache.get(symbol.toUpperCase())?.value;
 }
 
 function listHeldSymbols(): string[] {
@@ -55,10 +60,15 @@ export async function refreshAllPrices(): Promise<void> {
     insertIntraday.run(symbol, quote.price, quote.currency, now);
   }
 
-  const newSymbols = symbols.filter((s) => !analystTargetCache.has(s.toUpperCase()));
-  if (newSymbols.length > 0) {
-    const targets = await Promise.all(newSymbols.map((s) => fetchAnalystTargetPrice(s)));
-    newSymbols.forEach((s, i) => analystTargetCache.set(s.toUpperCase(), targets[i]));
+  const today = now.slice(0, 10);
+  const staleSymbols = symbols.filter(
+    (s) => analystTargetCache.get(s.toUpperCase())?.fetchedDate !== today
+  );
+  if (staleSymbols.length > 0) {
+    const targets = await Promise.all(staleSymbols.map((s) => fetchAnalystTargetPrice(s)));
+    staleSymbols.forEach((s, i) =>
+      analystTargetCache.set(s.toUpperCase(), { value: targets[i], fetchedDate: today })
+    );
   }
 
   const totalValueCad = computeTotalPortfolioValueCad(getCachedQuote);
