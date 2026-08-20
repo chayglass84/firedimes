@@ -33,34 +33,16 @@ body {
 header.app-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   padding: 20px 0;
 }
 
 header.app-header img {
-  height: 56px;
+  height: 160px;
   width: auto;
+  max-width: 100%;
   border-radius: 8px;
-}
-
-.app-header-text {
-  flex: 1;
-}
-
-header.app-header h1 {
-  font-size: 1.6rem;
-  margin: 0;
-  background: linear-gradient(90deg, var(--fire-red), var(--fire-orange), var(--fire-yellow));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  letter-spacing: 0.5px;
-}
-
-header.app-header p {
-  margin: 2px 0 0;
-  color: var(--text-dim);
-  font-size: 0.85rem;
 }
 
 .summary-strip {
@@ -297,10 +279,9 @@ td.symbol-cell {
   letter-spacing: 0.03em;
 }
 
-td.currency-tag {
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  margin-left: 4px;
+.currency-flag {
+  margin-left: 6px;
+  font-size: 0.9em;
 }
 
 .positive {

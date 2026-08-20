@@ -70,11 +70,7 @@ export default function App() {
   return (
     <>
       <header className="app-header">
-        <img src="/logo.png" alt="Fire Dimes" />
-        <div className="app-header-text">
-          <h1>Fire Dimes</h1>
-          <p>Silly investments. Real thrills. (Real portfolio, though.)</p>
-        </div>
+        <img src="/logo.png" alt="Fire Dimes — Silly investments. Real thrills." />
         <button className="btn btn-add-header" onClick={() => setShowAddModal(true)}>
           + Add Holding
         </button>

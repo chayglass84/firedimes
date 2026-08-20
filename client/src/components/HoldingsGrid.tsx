@@ -11,6 +11,12 @@ function changeClass(value: number | null): string {
   return value >= 0 ? "positive" : "negative";
 }
 
+function currencyFlag(currency: string | null): string | null {
+  if (currency === "USD") return "🇺🇸";
+  if (currency === "CAD") return "🇨🇦";
+  return null;
+}
+
 function TrashIcon() {
   return (
     <svg
@@ -45,10 +51,10 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
     <table className="holdings-grid">
       <thead>
         <tr>
+          <th>Price</th>
           <th>Symbol</th>
           <th>Shares</th>
           <th>Avg Cost</th>
-          <th>Price</th>
           <th>Today's Change (CAD)</th>
           <th>Market Value (CAD)</th>
           <th aria-hidden="true"></th>
@@ -57,21 +63,21 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
       <tbody>
         {holdings.map((h) => (
           <tr key={h.symbol}>
-            <td className="symbol-cell">
-              {h.symbol}
-              {h.currency && h.currency !== "CAD" && (
-                <span className="currency-tag">{h.currency}</span>
-              )}
-            </td>
-            <td>{h.shares}</td>
-            <td>{formatMoney(h.avgCost, h.currency)}</td>
             <td>
               {h.priceUnavailable ? (
                 <span className="muted">unavailable</span>
               ) : (
-                formatMoney(h.price, h.currency)
+                <>
+                  {formatMoney(h.price, h.currency)}
+                  {currencyFlag(h.currency) && (
+                    <span className="currency-flag">{currencyFlag(h.currency)}</span>
+                  )}
+                </>
               )}
             </td>
+            <td className="symbol-cell">{h.symbol}</td>
+            <td>{h.shares}</td>
+            <td>{formatMoney(h.avgCost, h.currency)}</td>
             <td className={changeClass(h.dayChangeDollarCad)}>
               {h.dayChangeDollarCad === null
                 ? "—"
