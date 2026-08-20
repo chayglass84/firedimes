@@ -18,6 +18,7 @@ function serializeHolding(row: HoldingRow) {
   const price = quote?.price ?? null;
   const previousClose = quote?.previousClose ?? null;
   const currency = quote?.currency ?? null;
+  const instrumentType = quote?.instrumentType ?? null;
 
   const marketValue = price !== null ? price * row.shares : null;
   const costBasis = row.avg_cost * row.shares;
@@ -44,6 +45,7 @@ function serializeHolding(row: HoldingRow) {
     avgCost: row.avg_cost,
     price,
     currency,
+    instrumentType,
     priceUnavailable: quote === undefined,
     marketValueCad,
     costBasisCad,

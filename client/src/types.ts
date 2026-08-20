@@ -9,6 +9,7 @@ export interface Holding {
   avgCost: number;
   price: number | null;
   currency: string | null;
+  instrumentType: string | null;
   priceUnavailable: boolean;
   marketValueCad: number | null;
   costBasisCad: number | null;

@@ -4,6 +4,7 @@ export interface Quote {
   previousClose: number;
   currency: string;
   marketState: string;
+  instrumentType: string;
 }
 
 /**
@@ -36,6 +37,7 @@ export async function fetchQuote(symbol: string): Promise<Quote | null> {
       previousClose: meta.previousClose ?? meta.chartPreviousClose ?? meta.regularMarketPrice,
       currency: meta.currency ?? "USD",
       marketState: meta.marketState ?? "UNKNOWN",
+      instrumentType: meta.instrumentType ?? "UNKNOWN",
     };
   } catch {
     return null;

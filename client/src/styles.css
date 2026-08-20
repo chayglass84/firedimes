@@ -443,6 +443,20 @@ table.holdings-grid th {
   border-bottom: 1px solid var(--border);
 }
 
+table.holdings-grid th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+table.holdings-grid th.sortable:hover {
+  color: var(--text);
+}
+
+.sort-arrow {
+  color: var(--fire-orange);
+}
+
 table.holdings-grid td {
   padding: 10px;
   border-bottom: 1px solid var(--border);
@@ -460,6 +474,17 @@ td.symbol-cell {
 .currency-flag {
   margin-left: 6px;
   font-size: 0.9em;
+}
+
+.symbol-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--text-dim);
+}
+
+.symbol-link:hover {
+  color: var(--fire-orange);
+  border-bottom-color: var(--fire-orange);
 }
 
 .positive {
