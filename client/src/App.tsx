@@ -82,6 +82,8 @@ export default function App() {
 
       {error && <div className="error-banner">{error}</div>}
 
+      <SummaryStrip holdings={holdings} />
+
       <SplitPane
         defaultLeftPercent={66.7}
         left={
@@ -102,8 +104,6 @@ export default function App() {
           />
         }
       />
-
-      <SummaryStrip holdings={holdings} />
 
       <div className="grid-section">
         <h2>
