@@ -78,7 +78,7 @@ export function PerformanceChartCard({
         </div>
       )}
       {error && <div className="error-banner">{error}</div>}
-      <LineChart points={points} />
+      <LineChart points={points} range={range} />
     </div>
   );
 }
