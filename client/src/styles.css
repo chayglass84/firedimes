@@ -1,0 +1,249 @@
+:root {
+  --bg: #0a1330;
+  --bg-panel: #101c42;
+  --bg-panel-alt: #16224e;
+  --border: #263866;
+  --text: #eaf0ff;
+  --text-dim: #93a0c9;
+  --fire-orange: #ff8a1f;
+  --fire-yellow: #ffcf4d;
+  --fire-red: #ff4d3d;
+  --gold: #d4af6a;
+  --green: #33d17a;
+  --red: #ff5a5a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at top, #101d47 0%, var(--bg) 55%);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+header.app-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+}
+
+header.app-header img {
+  height: 56px;
+  width: auto;
+  border-radius: 8px;
+}
+
+header.app-header h1 {
+  font-size: 1.6rem;
+  margin: 0;
+  background: linear-gradient(90deg, var(--fire-red), var(--fire-orange), var(--fire-yellow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.5px;
+}
+
+header.app-header p {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.summary-card .label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.summary-card .value {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.forms-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.panel h2 {
+  font-size: 0.95rem;
+  margin: 0 0 12px;
+  color: var(--gold);
+}
+
+.field-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 90px;
+}
+
+.field label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.field input,
+.field select {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: 1px solid var(--fire-orange);
+}
+
+button.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+button.btn-add {
+  background: linear-gradient(90deg, var(--fire-orange), var(--fire-yellow));
+  color: #201200;
+}
+
+button.btn-remove {
+  background: transparent;
+  border: 1px solid var(--fire-red);
+  color: var(--fire-red);
+}
+
+button.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.btn-refresh {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  padding: 6px 12px;
+}
+
+.error-banner {
+  background: rgba(255, 77, 61, 0.12);
+  border: 1px solid var(--fire-red);
+  color: #ffb3a8;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.grid-section h2 {
+  font-size: 1rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+table.holdings-grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.88rem;
+}
+
+table.holdings-grid th {
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+table.holdings-grid td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+table.holdings-grid tr:last-child td {
+  border-bottom: none;
+}
+
+td.symbol-cell {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+td.currency-tag {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+.positive {
+  color: var(--green);
+}
+
+.negative {
+  color: var(--red);
+}
+
+.muted {
+  color: var(--text-dim);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-dim);
+}
