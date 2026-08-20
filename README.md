@@ -12,6 +12,11 @@ builds the client if needed, starts the server if it isn't already running
 http://localhost:4000 in your default browser. Safe to run again any time —
 it won't start a second server if one's already up.
 
+**Auto-start at login:** a shortcut was added to your Windows Startup folder
+(`shell:startup` → "Fire Dimes.lnk") that runs `start.ps1 -NoBrowser` silently
+on login, so the server's already warm by the time you open a browser to it.
+To remove it, delete that shortcut from `shell:startup`.
+
 **Active development** (hot reload for UI changes): two processes, in two
 terminals:
 
