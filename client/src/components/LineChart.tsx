@@ -41,12 +41,16 @@ export function LineChart({ points, range, height = 200 }: Props) {
   const values = points.map((p) => p.v);
   const min = Math.min(...values);
   const max = Math.max(...values);
-  const valueRange = max - min || 1;
+  const AXIS_STEP = 50_000;
+  const axisMin = Math.floor(min / AXIS_STEP) * AXIS_STEP;
+  let axisMax = Math.ceil(max / AXIS_STEP) * AXIS_STEP;
+  if (axisMax === axisMin) axisMax += AXIS_STEP;
+  const valueRange = axisMax - axisMin;
   const pad = height * 0.1;
 
   const coords = points.map((p, i) => {
     const x = (i / (points.length - 1)) * VIEW_WIDTH;
-    const y = height - pad - ((p.v - min) / valueRange) * (height - pad * 2);
+    const y = height - pad - ((p.v - axisMin) / valueRange) * (height - pad * 2);
     return [x, y] as const;
   });
 
@@ -73,8 +77,8 @@ export function LineChart({ points, range, height = 200 }: Props) {
     <div className="line-chart-wrap">
       <div className="line-chart-body">
         <div className="line-chart-axis-y">
-          <span>{formatAxisValue(max)}</span>
-          <span>{formatAxisValue(min)}</span>
+          <span>{formatAxisValue(axisMax)}</span>
+          <span>{formatAxisValue(axisMin)}</span>
         </div>
         <div
           className="line-chart-plot"
