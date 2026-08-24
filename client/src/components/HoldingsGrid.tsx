@@ -182,10 +182,17 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
                     h.dayChangePercent
                   )})`}
             </td>
-            <td className={changeClass(h.totalGainDollarCad)}>
-              {h.marketValueCad === null
-                ? "—"
-                : `${formatMoney(h.marketValueCad, "CAD")} (${formatPercent(h.totalGainPercent)})`}
+            <td>
+              {h.marketValueCad === null ? (
+                "—"
+              ) : (
+                <>
+                  {formatMoney(h.marketValueCad, "CAD")}{" "}
+                  <span className={changeClass(h.totalGainDollarCad)}>
+                    ({formatPercent(h.totalGainPercent)})
+                  </span>
+                </>
+              )}
             </td>
             <td>
               <button
