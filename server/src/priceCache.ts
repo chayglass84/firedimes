@@ -79,10 +79,34 @@ export async function refreshAllPrices(): Promise<void> {
 
 let pollHandle: ReturnType<typeof setInterval> | null = null;
 
+// NYSE/TSX regular hours are 9:30am-4:00pm ET, i.e. 8:30am-3:00pm CT.
+// No need to hammer the price APIs nights/weekends when nothing is moving.
+function isMarketHoursCT(now: Date): boolean {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    weekday: "short",
+    hour: "numeric",
+    minute: "numeric",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const weekday = parts.find((p) => p.type === "weekday")?.value;
+  const hour = Number(parts.find((p) => p.type === "hour")?.value) % 24;
+  const minute = Number(parts.find((p) => p.type === "minute")?.value);
+
+  if (weekday === "Sat" || weekday === "Sun") return false;
+
+  const minutesSinceMidnight = hour * 60 + minute;
+  const marketOpen = 8 * 60 + 30; // 8:30am CT
+  const marketClose = 15 * 60; // 3:00pm CT
+  return minutesSinceMidnight >= marketOpen && minutesSinceMidnight <= marketClose;
+}
+
 export function startPricePolling(intervalMs = 10 * 60 * 1000): void {
   if (pollHandle) return;
   refreshAllPrices().catch((err) => console.error("Initial price refresh failed:", err));
   pollHandle = setInterval(() => {
+    if (!isMarketHoursCT(new Date())) return;
     refreshAllPrices().catch((err) => console.error("Price refresh failed:", err));
   }, intervalMs);
 }
