@@ -18,7 +18,9 @@ export interface RetirementInputs {
   bondReturnPostRetirement: number;
   retirementStockPercent: number;
   inflation: number;
-  retirementSalary: number;
+  retirementSalaryEarly: number;
+  retirementSalaryLate: number;
+  retirementSalaryLateAge: number;
   includeGovBenefits: boolean;
   cppAnnual: number;
   cppStartAge: number;

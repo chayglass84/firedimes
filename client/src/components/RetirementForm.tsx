@@ -28,7 +28,7 @@ const BALANCE_FIELDS: FieldSpec[] = [
 const ROOM_FIELDS: FieldSpec[] = [
   { key: "currentTfsaRoom", label: "Current TFSA Room", suffix: "$" },
   { key: "currentRrspRoom", label: "Current RRSP Room", suffix: "$" },
-  { key: "annualContribution", label: "Annual Contributions", suffix: "$" },
+  { key: "annualContribution", label: "Annual Contributions (indexed)", suffix: "$" },
 ];
 
 const RETURN_FIELDS: FieldSpec[] = [
@@ -39,7 +39,11 @@ const RETURN_FIELDS: FieldSpec[] = [
   { key: "inflation", label: "Inflation", suffix: "%", step: "0.1" },
 ];
 
-const SPENDING_FIELDS: FieldSpec[] = [{ key: "retirementSalary", label: "Retirement Salary", suffix: "$" }];
+const SPENDING_FIELDS: FieldSpec[] = [
+  { key: "retirementSalaryEarly", label: "Retirement Salary (from Retirement)", suffix: "$" },
+  { key: "retirementSalaryLate", label: "Retirement Salary (from Age Below)", suffix: "$" },
+  { key: "retirementSalaryLateAge", label: "Reduce Salary At Age" },
+];
 
 const BENEFIT_FIELDS: FieldSpec[] = [
   { key: "cppAnnual", label: "CPP (annual, today's $)", suffix: "$" },

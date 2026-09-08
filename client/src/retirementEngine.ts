@@ -49,7 +49,9 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   bondReturnPostRetirement: 3,
   retirementStockPercent: 100,
   inflation: 3,
-  retirementSalary: 100_000,
+  retirementSalaryEarly: 120_000,
+  retirementSalaryLate: 90_000,
+  retirementSalaryLateAge: 80,
   includeGovBenefits: true,
   cppAnnual: 15_000,
   cppStartAge: 65,
@@ -134,7 +136,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       tfsaRoom += TFSA_ANNUAL_LIMIT * inflationFactor;
       rrspRoom += RRSP_ANNUAL_LIMIT * inflationFactor;
 
-      let remaining = inputs.annualContribution;
+      const annualContribution = inputs.annualContribution * inflationFactor;
+      let remaining = annualContribution;
       const tfsaContribution = Math.min(remaining, Math.max(0, tfsaRoom));
       remaining -= tfsaContribution;
       tfsaRoom -= tfsaContribution;
@@ -157,7 +160,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
         rrspBalance: rrsp,
         nonRegBalance: nonReg,
         totalBalance: tfsa + rrsp + nonReg,
-        contribution: inputs.annualContribution,
+        contribution: annualContribution,
         tfsaContribution,
         rrspContribution,
         nonRegContribution,
@@ -184,7 +187,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     const oasIncome =
       inputs.includeGovBenefits && age >= inputs.oasStartAge ? inputs.oasAnnual * inflationFactor : 0;
     const baseIncome = cppIncome + oasIncome;
-    const spendingTarget = inputs.retirementSalary * inflationFactor;
+    const salaryBase = age >= inputs.retirementSalaryLateAge ? inputs.retirementSalaryLate : inputs.retirementSalaryEarly;
+    const spendingTarget = salaryBase * inflationFactor;
 
     const rrifFactor = rrifMinimumFactor(age);
     const rrifMinimum = rrifFactor > 0 ? rrsp * rrifFactor : null;
