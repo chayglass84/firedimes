@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { RetirementSimulationResult } from "../types";
+import type { RetirementInputs, RetirementSimulationResult } from "../types";
 import { DEFAULT_RETIREMENT_INPUTS, simulateRetirement } from "../retirementEngine";
 import { formatMoney } from "../format";
 import { RetirementForm } from "./RetirementForm";
@@ -8,11 +8,11 @@ import { RetirementTable } from "./RetirementTable";
 
 export function RetirementTab() {
   const [result, setResult] = useState<RetirementSimulationResult | null>(null);
-  const [retirementAge, setRetirementAge] = useState(DEFAULT_RETIREMENT_INPUTS.retirementAge);
+  const [lastInputs, setLastInputs] = useState<RetirementInputs>(DEFAULT_RETIREMENT_INPUTS);
 
-  function handleSimulate(inputs: typeof DEFAULT_RETIREMENT_INPUTS) {
+  function handleSimulate(inputs: RetirementInputs) {
     setResult(simulateRetirement(inputs));
-    setRetirementAge(inputs.retirementAge);
+    setLastInputs(inputs);
   }
 
   const atRetirement = result?.years.find((y) => y.phase === "retirement");
@@ -63,12 +63,12 @@ export function RetirementTab() {
             <div className="chart-card-header">
               <h2>Balance Over Time</h2>
             </div>
-            <RetirementChart years={result.years} retirementAge={retirementAge} ranOutAge={result.ranOutAge} />
+            <RetirementChart years={result.years} retirementAge={lastInputs.retirementAge} ranOutAge={result.ranOutAge} />
           </div>
 
           <div className="grid-section">
             <h2>Year by Year</h2>
-            <RetirementTable years={result.years} />
+            <RetirementTable years={result.years} inputs={lastInputs} />
           </div>
         </>
       )}
