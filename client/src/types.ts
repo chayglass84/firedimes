@@ -48,6 +48,8 @@ export interface RetirementYearResult {
   spendingTarget: number;
   shortfall: number;
   rrifMinimum: number | null;
+  tfsaRoomRemaining: number | null;
+  rrspRoomRemaining: number | null;
 }
 
 export interface RetirementSimulationResult {

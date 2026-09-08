@@ -171,6 +171,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
         spendingTarget: 0,
         shortfall: 0,
         rrifMinimum: null,
+        tfsaRoomRemaining: tfsaRoom,
+        rrspRoomRemaining: rrspRoom,
       });
       continue;
     }
@@ -256,6 +258,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       spendingTarget,
       shortfall,
       rrifMinimum,
+      tfsaRoomRemaining: null,
+      rrspRoomRemaining: null,
     });
   }
 

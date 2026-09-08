@@ -14,6 +14,7 @@ interface AccountBreakdown {
   withdrawal: number;
   growth: number;
   end: number;
+  roomRemaining: number | null;
 }
 
 function accountBreakdown(
@@ -21,10 +22,11 @@ function accountBreakdown(
   start: number,
   end: number,
   contribution: number,
-  withdrawal: number
+  withdrawal: number,
+  roomRemaining: number | null
 ): AccountBreakdown {
   const growth = end - start - contribution + withdrawal;
-  return { label, start, contribution, withdrawal, growth, end };
+  return { label, start, contribution, withdrawal, growth, end, roomRemaining };
 }
 
 export function RetirementTable({ years, inputs }: Props) {
@@ -75,9 +77,30 @@ export function RetirementTable({ years, inputs }: Props) {
           const isOpen = expanded.has(y.year);
           const prev = prevBalances[i];
           const breakdown: AccountBreakdown[] = [
-            accountBreakdown("TFSA", prev.tfsa, y.tfsaBalance, y.tfsaContribution, y.tfsaWithdrawal),
-            accountBreakdown("RRSP", prev.rrsp, y.rrspBalance, y.rrspContribution, y.rrspWithdrawal),
-            accountBreakdown("Non-Reg", prev.nonReg, y.nonRegBalance, y.nonRegContribution, y.nonRegWithdrawal),
+            accountBreakdown(
+              "TFSA",
+              prev.tfsa,
+              y.tfsaBalance,
+              y.tfsaContribution,
+              y.tfsaWithdrawal,
+              y.tfsaRoomRemaining
+            ),
+            accountBreakdown(
+              "RRSP",
+              prev.rrsp,
+              y.rrspBalance,
+              y.rrspContribution,
+              y.rrspWithdrawal,
+              y.rrspRoomRemaining
+            ),
+            accountBreakdown(
+              "Non-Reg",
+              prev.nonReg,
+              y.nonRegBalance,
+              y.nonRegContribution,
+              y.nonRegWithdrawal,
+              null
+            ),
           ];
           const totalContribution = breakdown.reduce((sum, b) => sum + b.contribution, 0);
           const totalWithdrawal = breakdown.reduce((sum, b) => sum + b.withdrawal, 0);
@@ -140,6 +163,7 @@ export function RetirementTable({ years, inputs }: Props) {
                           <th>Withdrawal</th>
                           <th>Growth</th>
                           <th>End</th>
+                          <th>Room Left</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -151,6 +175,15 @@ export function RetirementTable({ years, inputs }: Props) {
                             <td>{b.withdrawal > 0 ? formatMoney(b.withdrawal, "CAD") : <span className="muted">—</span>}</td>
                             <td className={b.growth >= 0 ? "positive" : "negative"}>{formatMoney(b.growth, "CAD")}</td>
                             <td>{formatMoney(b.end, "CAD")}</td>
+                            <td className={b.roomRemaining !== null && b.roomRemaining <= 0 ? "negative" : ""}>
+                              {b.label === "Non-Reg" ? (
+                                <span className="muted">Unlimited</span>
+                              ) : b.roomRemaining !== null ? (
+                                formatMoney(b.roomRemaining, "CAD")
+                              ) : (
+                                <span className="muted">—</span>
+                              )}
+                            </td>
                           </tr>
                         ))}
                         <tr className="retirement-breakdown-total">
@@ -160,6 +193,7 @@ export function RetirementTable({ years, inputs }: Props) {
                           <td>{formatMoney(totalWithdrawal, "CAD")}</td>
                           <td className={totalGrowth >= 0 ? "positive" : "negative"}>{formatMoney(totalGrowth, "CAD")}</td>
                           <td>{formatMoney(y.totalBalance, "CAD")}</td>
+                          <td></td>
                         </tr>
                       </tbody>
                     </table>
