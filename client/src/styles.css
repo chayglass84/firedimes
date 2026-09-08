@@ -504,3 +504,171 @@ td.symbol-cell {
   padding: 40px 0;
   color: var(--text-dim);
 }
+
+.tab-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.tab-toggle button {
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tab-toggle button.active {
+  background: linear-gradient(90deg, var(--fire-orange), var(--fire-yellow));
+  color: #201200;
+  border-color: transparent;
+}
+
+.retirement-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.retirement-form-card {
+  height: auto;
+}
+
+.retirement-form-section {
+  margin-bottom: 16px;
+}
+
+.retirement-form-section h3 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.toggle-label input {
+  cursor: pointer;
+}
+
+.retirement-form .field {
+  min-width: 130px;
+}
+
+.retirement-form button.btn {
+  margin-top: 4px;
+}
+
+.retirement-band-nonreg {
+  fill: var(--fire-red);
+  opacity: 0.55;
+}
+
+.retirement-band-rrsp {
+  fill: var(--fire-orange);
+  opacity: 0.55;
+}
+
+.retirement-band-tfsa {
+  fill: var(--fire-yellow);
+  opacity: 0.55;
+}
+
+.chart-marker-line {
+  stroke: var(--gold);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-depleted-line {
+  stroke: var(--red);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.retirement-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.retirement-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.retirement-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.retirement-swatch-tfsa {
+  background: var(--fire-yellow);
+}
+
+.retirement-swatch-rrsp {
+  background: var(--fire-orange);
+}
+
+.retirement-swatch-nonreg {
+  background: var(--fire-red);
+}
+
+.retirement-tooltip {
+  min-width: 170px;
+}
+
+.retirement-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+.retirement-tooltip-total {
+  color: var(--text);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.retirement-grid {
+  font-size: 0.82rem;
+}
+
+.retirement-total-cell {
+  font-weight: 600;
+}
+
+tr.retirement-row td {
+  background: rgba(212, 175, 106, 0.04);
+}
+
+tr.negative-row td {
+  background: rgba(255, 90, 90, 0.08);
+}

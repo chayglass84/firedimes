@@ -3,6 +3,58 @@ export interface PortfolioPoint {
   v: number;
 }
 
+export interface RetirementInputs {
+  currentAge: number;
+  retirementAge: number;
+  liveUntilAge: number;
+  currentTfsaBalance: number;
+  currentRrspBalance: number;
+  currentNonRegBalance: number;
+  currentTfsaRoom: number;
+  currentRrspRoom: number;
+  annualContribution: number;
+  stockReturnPreRetirement: number;
+  stockReturnPostRetirement: number;
+  bondReturnPostRetirement: number;
+  retirementStockPercent: number;
+  inflation: number;
+  retirementSalary: number;
+  includeGovBenefits: boolean;
+  cppAnnual: number;
+  cppStartAge: number;
+  oasAnnual: number;
+  oasStartAge: number;
+}
+
+export interface RetirementYearResult {
+  year: number;
+  age: number;
+  phase: "accumulation" | "retirement";
+  tfsaBalance: number;
+  rrspBalance: number;
+  nonRegBalance: number;
+  totalBalance: number;
+  contribution: number;
+  tfsaContribution: number;
+  rrspContribution: number;
+  nonRegContribution: number;
+  withdrawal: number;
+  tfsaWithdrawal: number;
+  rrspWithdrawal: number;
+  nonRegWithdrawal: number;
+  cppIncome: number;
+  oasIncome: number;
+  taxPaid: number;
+  spendingTarget: number;
+  shortfall: number;
+  rrifMinimum: number | null;
+}
+
+export interface RetirementSimulationResult {
+  years: RetirementYearResult[];
+  ranOutAge: number | null;
+}
+
 export interface Holding {
   symbol: string;
   shares: number;

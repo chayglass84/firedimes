@@ -6,12 +6,16 @@ import { ConfirmRemoveModal } from "./components/ConfirmRemoveModal";
 import { HoldingsGrid } from "./components/HoldingsGrid";
 import { Modal } from "./components/Modal";
 import { PerformanceChartCard } from "./components/PerformanceChartCard";
+import { RetirementTab } from "./components/RetirementTab";
 import { SplitPane } from "./components/SplitPane";
 import { SummaryStrip } from "./components/SummaryStrip";
 
 const POLL_INTERVAL_MS = 10 * 60 * 1000;
 
+type Tab = "portfolio" | "retirement";
+
 export default function App() {
+  const [tab, setTab] = useState<Tab>("portfolio");
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -75,45 +79,61 @@ export default function App() {
     <>
       <header className="app-header">
         <img src="/logo.png" alt="Fire Dimes — Silly investments. Real thrills." />
-        <button className="btn btn-add-header" onClick={() => setShowAddModal(true)}>
-          + Add Holding
-        </button>
+        <nav className="tab-toggle">
+          <button className={tab === "portfolio" ? "active" : ""} onClick={() => setTab("portfolio")}>
+            Portfolio
+          </button>
+          <button className={tab === "retirement" ? "active" : ""} onClick={() => setTab("retirement")}>
+            Retirement
+          </button>
+        </nav>
+        {tab === "portfolio" && (
+          <button className="btn btn-add-header" onClick={() => setShowAddModal(true)}>
+            + Add Holding
+          </button>
+        )}
       </header>
 
-      {error && <div className="error-banner">{error}</div>}
+      {tab === "retirement" ? (
+        <RetirementTab />
+      ) : (
+        <>
+          {error && <div className="error-banner">{error}</div>}
 
-      <SummaryStrip holdings={holdings} />
+          <SummaryStrip holdings={holdings} />
 
-      <SplitPane
-        defaultLeftPercent={66.7}
-        left={
-          <PerformanceChartCard
-            title="Overall Performance"
-            filterable
-            defaultRange="1m"
-            pollMs={POLL_INTERVAL_MS}
-            refreshSignal={chartRefreshSignal}
+          <SplitPane
+            defaultLeftPercent={66.7}
+            left={
+              <PerformanceChartCard
+                title="Overall Performance"
+                filterable
+                defaultRange="1m"
+                pollMs={POLL_INTERVAL_MS}
+                refreshSignal={chartRefreshSignal}
+              />
+            }
+            right={
+              <PerformanceChartCard
+                title="Daily Performance"
+                fixedRange="1d"
+                pollMs={POLL_INTERVAL_MS}
+                refreshSignal={chartRefreshSignal}
+              />
+            }
           />
-        }
-        right={
-          <PerformanceChartCard
-            title="Daily Performance"
-            fixedRange="1d"
-            pollMs={POLL_INTERVAL_MS}
-            refreshSignal={chartRefreshSignal}
-          />
-        }
-      />
 
-      <div className="grid-section">
-        <h2>
-          Holdings
-          <button className="btn btn-refresh" onClick={handleRefresh} disabled={refreshing}>
-            {refreshing ? "Refreshing…" : "Refresh prices"}
-          </button>
-        </h2>
-        <HoldingsGrid holdings={holdings} onDeleteClick={setRemoveTarget} />
-      </div>
+          <div className="grid-section">
+            <h2>
+              Holdings
+              <button className="btn btn-refresh" onClick={handleRefresh} disabled={refreshing}>
+                {refreshing ? "Refreshing…" : "Refresh prices"}
+              </button>
+            </h2>
+            <HoldingsGrid holdings={holdings} onDeleteClick={setRemoveTarget} />
+          </div>
+        </>
+      )}
 
       {showAddModal && (
         <Modal title="Add / Buy More" onClose={() => setShowAddModal(false)}>
