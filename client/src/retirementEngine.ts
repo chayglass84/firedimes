@@ -122,14 +122,17 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
   let rrspRoom = inputs.currentRrspRoom;
   let ranOutAge: number | null = null;
 
+  // Each row represents one full elapsed year from today, so the first row
+  // (i=0) is age currentAge+1 after a year of growth/contribution — not
+  // currentAge itself, which is the (unshown) starting point.
   const currentCalendarYear = new Date().getFullYear();
-  const totalYears = Math.max(0, inputs.liveUntilAge - inputs.currentAge + 1);
+  const totalYears = Math.max(0, inputs.liveUntilAge - inputs.currentAge);
   const years: RetirementYearResult[] = [];
 
   for (let i = 0; i < totalYears; i++) {
-    const age = inputs.currentAge + i;
-    const year = currentCalendarYear + i;
-    const inflationFactor = Math.pow(1 + inflationRate, i);
+    const age = inputs.currentAge + i + 1;
+    const year = currentCalendarYear + i + 1;
+    const inflationFactor = Math.pow(1 + inflationRate, i + 1);
     const isRetired = age >= inputs.retirementAge;
 
     if (!isRetired) {
