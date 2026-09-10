@@ -735,3 +735,7 @@ tr.retirement-breakdown-total td {
   color: var(--text-dim);
   margin: 10px 0 0;
 }
+
+.retirement-rrif-excess {
+  color: var(--fire-orange);
+}

@@ -205,6 +205,12 @@ export function RetirementTable({ years, inputs }: Props) {
                         , tax paid {formatMoney(y.taxPaid, "CAD")}.
                       </p>
                     )}
+                    {y.rrifExcessReinvested > 0 && (
+                      <p className="retirement-detail-note retirement-rrif-excess">
+                        RRIF minimum forced a withdrawal above your spending target — the{" "}
+                        {formatMoney(y.rrifExcessReinvested, "CAD")} after-tax surplus was reinvested into Non-Reg.
+                      </p>
+                    )}
                   </td>
                 </tr>
               )}

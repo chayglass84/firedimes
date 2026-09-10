@@ -50,6 +50,7 @@ export interface RetirementYearResult {
   spendingTarget: number;
   shortfall: number;
   rrifMinimum: number | null;
+  rrifExcessReinvested: number;
   tfsaRoomRemaining: number | null;
   rrspRoomRemaining: number | null;
 }

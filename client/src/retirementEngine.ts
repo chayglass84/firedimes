@@ -177,6 +177,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
         spendingTarget: 0,
         shortfall: 0,
         rrifMinimum: null,
+        rrifExcessReinvested: 0,
         tfsaRoomRemaining: tfsaRoom,
         rrspRoomRemaining: rrspRoom,
       });
@@ -211,9 +212,11 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     const incomeTax = taxOwed(baseIncome + rrspWithdrawal, brackets);
     const netFromRrsp = rrspWithdrawal - (incomeTax - taxOwed(baseIncome, brackets));
     remaining -= netFromRrsp;
+    let rrifExcessReinvested = 0;
     if (remaining < 0) {
       // Forced RRIF withdrawal exceeded what was needed — reinvest the after-tax surplus.
-      nonReg += -remaining;
+      rrifExcessReinvested = -remaining;
+      nonReg += rrifExcessReinvested;
       remaining = 0;
     }
 
@@ -265,6 +268,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       spendingTarget,
       shortfall,
       rrifMinimum,
+      rrifExcessReinvested,
       tfsaRoomRemaining: null,
       rrspRoomRemaining: null,
     });
