@@ -284,6 +284,17 @@ header.app-header img {
   outline: 1px solid var(--fire-orange);
 }
 
+.field-static {
+  background: var(--bg-panel-alt);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+}
+
 button.btn {
   border: none;
   border-radius: 6px;

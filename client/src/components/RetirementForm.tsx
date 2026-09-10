@@ -31,9 +31,12 @@ const ROOM_FIELDS: FieldSpec[] = [
   { key: "annualContribution", label: "Annual Contributions (indexed)", suffix: "$", step: "10000" },
 ];
 
-const RETURN_FIELDS: FieldSpec[] = [
+const STOCK_RETURN_FIELDS: FieldSpec[] = [
   { key: "stockReturnPreRetirement", label: "Stock Return Pre Retirement", suffix: "%", step: "0.5" },
   { key: "stockReturnPostRetirement", label: "Stock Return Post Retirement", suffix: "%", step: "0.5" },
+];
+
+const OTHER_RETURN_FIELDS: FieldSpec[] = [
   { key: "bondReturnPostRetirement", label: "Bond Return Post Retirement", suffix: "%", step: "0.5" },
   { key: "retirementStockPercent", label: "Retirement Stock %", suffix: "%", step: "5" },
   { key: "inflation", label: "Inflation", suffix: "%", step: "0.5" },
@@ -101,7 +104,33 @@ export function RetirementForm({ initial, onSimulate }: Props) {
 
       <div className="retirement-form-section">
         <h3>Returns &amp; Inflation</h3>
-        <div className="field-row">{RETURN_FIELDS.map(renderField)}</div>
+        <div className="field-row">
+          <div className="field">
+            <label htmlFor="ret-stockReturnMode">Stock Return Basis</label>
+            <select
+              id="ret-stockReturnMode"
+              value={inputs.stockReturnMode}
+              onChange={(e) =>
+                setInputs((prev) => ({
+                  ...prev,
+                  stockReturnMode: e.target.value as RetirementInputs["stockReturnMode"],
+                }))
+              }
+            >
+              <option value="custom">Custom</option>
+              <option value="sp500">S&amp;P 500 (Historical)</option>
+            </select>
+          </div>
+          {inputs.stockReturnMode === "custom" ? (
+            STOCK_RETURN_FIELDS.map(renderField)
+          ) : (
+            <div className="field">
+              <label>Stock Return (Pre &amp; Post Retirement)</label>
+              <div className="field-static">Nominal mean 12%, σ 20% — randomized each year</div>
+            </div>
+          )}
+        </div>
+        <div className="field-row">{OTHER_RETURN_FIELDS.map(renderField)}</div>
       </div>
 
       <div className="retirement-form-section">

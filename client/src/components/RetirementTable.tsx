@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
 import type { RetirementInputs, RetirementYearResult } from "../types";
-import { formatMoney } from "../format";
+import { formatMoney, formatPercent } from "../format";
 
 interface Props {
   years: RetirementYearResult[];
@@ -197,6 +197,11 @@ export function RetirementTable({ years, inputs }: Props) {
                         </tr>
                       </tbody>
                     </table>
+                    {inputs.stockReturnMode === "sp500" && (
+                      <p className="retirement-detail-note">
+                        Stock return this year: {formatPercent(y.stockReturnUsed * 100)}
+                      </p>
+                    )}
                     {y.phase === "retirement" && (
                       <p className="retirement-detail-note">
                         Spending target {formatMoney(y.spendingTarget, "CAD")}

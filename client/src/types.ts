@@ -13,6 +13,7 @@ export interface RetirementInputs {
   currentTfsaRoom: number;
   currentRrspRoom: number;
   annualContribution: number;
+  stockReturnMode: "custom" | "sp500";
   stockReturnPreRetirement: number;
   stockReturnPostRetirement: number;
   bondReturnPostRetirement: number;
@@ -51,6 +52,7 @@ export interface RetirementYearResult {
   shortfall: number;
   rrifMinimum: number | null;
   rrifExcessReinvested: number;
+  stockReturnUsed: number;
   tfsaRoomRemaining: number | null;
   rrspRoomRemaining: number | null;
 }

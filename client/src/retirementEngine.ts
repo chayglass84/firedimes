@@ -34,6 +34,13 @@ const RRIF_MIN_FACTORS: Record<number, number> = {
 };
 const RRIF_MIN_FACTOR_95_PLUS = 0.2;
 
+// "S&P 500 (Historical)" mode: nominal total annual return (price + dividends),
+// 1928-present. Arithmetic mean ~12%, std dev ~20% (Ibbotson/NYU Stern data) — the
+// arithmetic mean is the correct input for a per-year random draw, since compounding
+// it back out roughly recovers the ~10% historical CAGR after volatility drag.
+const SP500_NOMINAL_MEAN = 0.12;
+const SP500_NOMINAL_STDDEV = 0.2;
+
 export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   currentAge: 41,
   retirementAge: 60,
@@ -44,6 +51,7 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   currentTfsaRoom: 120_000,
   currentRrspRoom: 60_000,
   annualContribution: 50_000,
+  stockReturnMode: "custom",
   stockReturnPreRetirement: 7,
   stockReturnPostRetirement: 6,
   bondReturnPostRetirement: 3,
@@ -58,6 +66,16 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   oasAnnual: 8_600,
   oasStartAge: 65,
 };
+
+// Box-Muller transform for a normally-distributed random draw.
+function randomNormal(mean: number, stdDev: number): number {
+  let u1 = 0;
+  let u2 = 0;
+  while (u1 === 0) u1 = Math.random();
+  while (u2 === 0) u2 = Math.random();
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return mean + stdDev * z;
+}
 
 function rrifMinimumFactor(age: number): number {
   if (age < 71) return 0;
@@ -109,11 +127,8 @@ function grossUpForNet(baseIncome: number, netNeeded: number, brackets: Bracket[
 
 export function simulateRetirement(inputs: RetirementInputs): RetirementSimulationResult {
   const inflationRate = inputs.inflation / 100;
-  const stockPreRate = inputs.stockReturnPreRetirement / 100;
-  const stockPostRate = inputs.stockReturnPostRetirement / 100;
   const bondPostRate = inputs.bondReturnPostRetirement / 100;
   const stockPct = inputs.retirementStockPercent / 100;
-  const blendedPostRate = stockPct * stockPostRate + (1 - stockPct) * bondPostRate;
 
   let tfsa = inputs.currentTfsaBalance;
   let rrsp = inputs.currentRrspBalance;
@@ -135,6 +150,11 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     const inflationFactor = Math.pow(1 + inflationRate, i + 1);
     const isRetired = age >= inputs.retirementAge;
 
+    const stockRate =
+      inputs.stockReturnMode === "sp500"
+        ? randomNormal(SP500_NOMINAL_MEAN, SP500_NOMINAL_STDDEV)
+        : (isRetired ? inputs.stockReturnPostRetirement : inputs.stockReturnPreRetirement) / 100;
+
     if (!isRetired) {
       tfsaRoom += TFSA_ANNUAL_LIMIT * inflationFactor;
       rrspRoom += RRSP_ANNUAL_LIMIT * inflationFactor;
@@ -151,9 +171,9 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
 
       const nonRegContribution = remaining;
 
-      tfsa = (tfsa + tfsaContribution) * (1 + stockPreRate);
-      rrsp = (rrsp + rrspContribution) * (1 + stockPreRate);
-      nonReg = (nonReg + nonRegContribution) * (1 + stockPreRate);
+      tfsa = (tfsa + tfsaContribution) * (1 + stockRate);
+      rrsp = (rrsp + rrspContribution) * (1 + stockRate);
+      nonReg = (nonReg + nonRegContribution) * (1 + stockRate);
 
       years.push({
         year,
@@ -178,6 +198,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
         shortfall: 0,
         rrifMinimum: null,
         rrifExcessReinvested: 0,
+        stockReturnUsed: stockRate,
         tfsaRoomRemaining: tfsaRoom,
         rrspRoomRemaining: rrspRoom,
       });
@@ -236,6 +257,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     const shortfall = Math.max(0, remaining);
     if (shortfall > 0 && ranOutAge === null) ranOutAge = age;
 
+    const blendedPostRate = stockPct * stockRate + (1 - stockPct) * bondPostRate;
+
     // Growth, with non-registered growth taxed as realized capital gains annually
     // (a simplification that avoids decades of cost-basis tracking).
     const nonRegGrowth = nonReg * blendedPostRate;
@@ -277,6 +300,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       shortfall,
       rrifMinimum,
       rrifExcessReinvested,
+      stockReturnUsed: stockRate,
       tfsaRoomRemaining: null,
       rrspRoomRemaining: null,
     });
