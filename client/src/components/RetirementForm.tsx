@@ -40,9 +40,9 @@ const RETURN_FIELDS: FieldSpec[] = [
 ];
 
 const SPENDING_FIELDS: FieldSpec[] = [
-  { key: "retirementSalaryEarly", label: "Retirement Salary (from Retirement)", suffix: "$", step: "10000" },
-  { key: "retirementSalaryLate", label: "Retirement Salary (from Age Below)", suffix: "$", step: "10000" },
-  { key: "retirementSalaryLateAge", label: "Reduce Salary At Age" },
+  { key: "retirementSalaryEarly", label: "After-Tax Spending (from Retirement)", suffix: "$", step: "10000" },
+  { key: "retirementSalaryLate", label: "After-Tax Spending (from Age Below)", suffix: "$", step: "10000" },
+  { key: "retirementSalaryLateAge", label: "Reduce Spending At Age" },
 ];
 
 const BENEFIT_FIELDS: FieldSpec[] = [
