@@ -115,12 +115,14 @@ export function RetirementForm({ initial, onSimulate }: Props) {
             <select
               id="ret-stockReturnMode"
               value={inputs.stockReturnMode}
-              onChange={(e) =>
+              onChange={(e) => {
+                const mode = e.target.value as RetirementInputs["stockReturnMode"];
                 setInputs((prev) => ({
                   ...prev,
-                  stockReturnMode: e.target.value as RetirementInputs["stockReturnMode"],
-                }))
-              }
+                  stockReturnMode: mode,
+                  ...(mode === "sp500" ? { retirementStockPercent: 70 } : {}),
+                }));
+              }}
             >
               <option value="custom">Custom</option>
               <option value="sp500">S&amp;P 500 (Historical)</option>

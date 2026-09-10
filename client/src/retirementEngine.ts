@@ -47,13 +47,13 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   stockReturnMode: "custom",
   stockReturnPreRetirement: 7,
   stockReturnPostRetirement: 6,
-  // "S&P 500 (Historical)" mode defaults: nominal total annual return
-  // (price + dividends), 1928-present, editable by the user. Arithmetic
-  // mean is deliberately used for the per-year random draw (rather than
-  // the ~10% geometric CAGR) since compounding a mean-preserving random
-  // walk recovers the arithmetic mean in expectation, not the CAGR.
-  sp500Mean: 10,
-  sp500StdDev: 20,
+  // "S&P 500 (Historical)" mode defaults, editable by the user. Deliberately
+  // dialed down from the ~10%/20% historical nominal figures — a 54-year
+  // horizon (age 41-95) compounds even mid-single-digit-CAGR outcomes into
+  // eye-watering numbers, so the user chose a more conservative-than-accurate
+  // assumption on purpose rather than a strictly historical one.
+  sp500Mean: 8,
+  sp500StdDev: 18,
   bondReturnPostRetirement: 3,
   retirementStockPercent: 100,
   inflation: 3,
