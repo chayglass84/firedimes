@@ -257,7 +257,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       contribution: 0,
       tfsaContribution: 0,
       rrspContribution: 0,
-      nonRegContribution: 0,
+      nonRegContribution: rrifExcessReinvested,
       withdrawal: nonRegWithdrawal + rrspWithdrawal + tfsaWithdrawal,
       tfsaWithdrawal,
       rrspWithdrawal,
