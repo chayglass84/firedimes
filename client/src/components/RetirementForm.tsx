@@ -36,6 +36,11 @@ const STOCK_RETURN_FIELDS: FieldSpec[] = [
   { key: "stockReturnPostRetirement", label: "Stock Return Post Retirement", suffix: "%", step: "0.5" },
 ];
 
+const SP500_FIELDS: FieldSpec[] = [
+  { key: "sp500Mean", label: "Mean (Stock Return)", suffix: "%", step: "0.5" },
+  { key: "sp500StdDev", label: "Std Dev (Stock Return)", suffix: "%", step: "0.5" },
+];
+
 const OTHER_RETURN_FIELDS: FieldSpec[] = [
   { key: "bondReturnPostRetirement", label: "Bond Return Post Retirement", suffix: "%", step: "0.5" },
   { key: "retirementStockPercent", label: "Retirement Stock %", suffix: "%", step: "5" },
@@ -121,14 +126,9 @@ export function RetirementForm({ initial, onSimulate }: Props) {
               <option value="sp500">S&amp;P 500 (Historical)</option>
             </select>
           </div>
-          {inputs.stockReturnMode === "custom" ? (
-            STOCK_RETURN_FIELDS.map(renderField)
-          ) : (
-            <div className="field">
-              <label>Stock Return (Pre &amp; Post Retirement)</label>
-              <div className="field-static">Nominal mean 12%, σ 20% — randomized each year</div>
-            </div>
-          )}
+          {inputs.stockReturnMode === "custom"
+            ? STOCK_RETURN_FIELDS.map(renderField)
+            : SP500_FIELDS.map(renderField)}
         </div>
         <div className="field-row">{OTHER_RETURN_FIELDS.map(renderField)}</div>
       </div>

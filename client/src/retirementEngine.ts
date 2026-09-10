@@ -34,13 +34,6 @@ const RRIF_MIN_FACTORS: Record<number, number> = {
 };
 const RRIF_MIN_FACTOR_95_PLUS = 0.2;
 
-// "S&P 500 (Historical)" mode: nominal total annual return (price + dividends),
-// 1928-present. Arithmetic mean ~12%, std dev ~20% (Ibbotson/NYU Stern data) — the
-// arithmetic mean is the correct input for a per-year random draw, since compounding
-// it back out roughly recovers the ~10% historical CAGR after volatility drag.
-const SP500_NOMINAL_MEAN = 0.12;
-const SP500_NOMINAL_STDDEV = 0.2;
-
 export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   currentAge: 41,
   retirementAge: 60,
@@ -54,6 +47,13 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   stockReturnMode: "custom",
   stockReturnPreRetirement: 7,
   stockReturnPostRetirement: 6,
+  // "S&P 500 (Historical)" mode defaults: nominal total annual return
+  // (price + dividends), 1928-present, editable by the user. Arithmetic
+  // mean is deliberately used for the per-year random draw (rather than
+  // the ~10% geometric CAGR) since compounding a mean-preserving random
+  // walk recovers the arithmetic mean in expectation, not the CAGR.
+  sp500Mean: 10,
+  sp500StdDev: 20,
   bondReturnPostRetirement: 3,
   retirementStockPercent: 100,
   inflation: 3,
@@ -152,7 +152,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
 
     const stockRate =
       inputs.stockReturnMode === "sp500"
-        ? randomNormal(SP500_NOMINAL_MEAN, SP500_NOMINAL_STDDEV)
+        ? randomNormal(inputs.sp500Mean / 100, inputs.sp500StdDev / 100)
         : (isRetired ? inputs.stockReturnPostRetirement : inputs.stockReturnPreRetirement) / 100;
 
     if (!isRetired) {

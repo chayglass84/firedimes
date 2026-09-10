@@ -16,6 +16,8 @@ export interface RetirementInputs {
   stockReturnMode: "custom" | "sp500";
   stockReturnPreRetirement: number;
   stockReturnPostRetirement: number;
+  sp500Mean: number;
+  sp500StdDev: number;
   bondReturnPostRetirement: number;
   retirementStockPercent: number;
   inflation: number;

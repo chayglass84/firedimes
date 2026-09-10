@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
 import type { RetirementInputs, RetirementYearResult } from "../types";
-import { formatMoney, formatPercent } from "../format";
+import { formatWholeDollars, formatPercent } from "../format";
 
 interface Props {
   years: RetirementYearResult[];
@@ -66,6 +66,8 @@ export function RetirementTable({ years, inputs }: Props) {
           <th>RRSP</th>
           <th>Non-Reg</th>
           <th>Total</th>
+          <th>Growth</th>
+          <th>Stock Return</th>
           <th>Contribution</th>
           <th>CPP + OAS</th>
           <th>Withdrawal</th>
@@ -119,20 +121,22 @@ export function RetirementTable({ years, inputs }: Props) {
                 </td>
                 <td>{y.year}</td>
                 <td>{y.age}</td>
-                <td>{formatMoney(y.tfsaBalance, "CAD")}</td>
-                <td>{formatMoney(y.rrspBalance, "CAD")}</td>
-                <td>{formatMoney(y.nonRegBalance, "CAD")}</td>
-                <td className="retirement-total-cell">{formatMoney(y.totalBalance, "CAD")}</td>
+                <td>{formatWholeDollars(y.tfsaBalance)}</td>
+                <td>{formatWholeDollars(y.rrspBalance)}</td>
+                <td>{formatWholeDollars(y.nonRegBalance)}</td>
+                <td className="retirement-total-cell">{formatWholeDollars(y.totalBalance)}</td>
+                <td className={totalGrowth >= 0 ? "positive" : "negative"}>{formatWholeDollars(totalGrowth)}</td>
+                <td>{formatPercent(y.stockReturnUsed * 100)}</td>
                 <td>
                   {y.phase === "accumulation" ? (
-                    formatMoney(y.contribution, "CAD")
+                    formatWholeDollars(y.contribution)
                   ) : (
                     <span className="muted">—</span>
                   )}
                 </td>
                 <td>
                   {y.phase === "retirement" && y.cppIncome + y.oasIncome > 0 ? (
-                    formatMoney(y.cppIncome + y.oasIncome, "CAD")
+                    formatWholeDollars(y.cppIncome + y.oasIncome)
                   ) : (
                     <span className="muted">—</span>
                   )}
@@ -140,20 +144,20 @@ export function RetirementTable({ years, inputs }: Props) {
                 <td>
                   {y.phase === "retirement" ? (
                     <>
-                      {formatMoney(y.withdrawal, "CAD")}
+                      {formatWholeDollars(y.withdrawal)}
                       {y.shortfall > 0 && (
-                        <span className="negative"> (short {formatMoney(y.shortfall, "CAD")})</span>
+                        <span className="negative"> (short {formatWholeDollars(y.shortfall)})</span>
                       )}
                     </>
                   ) : (
                     <span className="muted">—</span>
                   )}
                 </td>
-                <td>{y.phase === "retirement" ? formatMoney(y.taxPaid, "CAD") : <span className="muted">—</span>}</td>
+                <td>{y.phase === "retirement" ? formatWholeDollars(y.taxPaid) : <span className="muted">—</span>}</td>
               </tr>
               {isOpen && (
                 <tr className="retirement-detail-row">
-                  <td colSpan={11}>
+                  <td colSpan={13}>
                     <table className="retirement-breakdown">
                       <thead>
                         <tr>
@@ -170,16 +174,16 @@ export function RetirementTable({ years, inputs }: Props) {
                         {breakdown.map((b) => (
                           <tr key={b.label}>
                             <td>{b.label}</td>
-                            <td>{formatMoney(b.start, "CAD")}</td>
-                            <td>{b.contribution > 0 ? formatMoney(b.contribution, "CAD") : <span className="muted">—</span>}</td>
-                            <td>{b.withdrawal > 0 ? formatMoney(b.withdrawal, "CAD") : <span className="muted">—</span>}</td>
-                            <td className={b.growth >= 0 ? "positive" : "negative"}>{formatMoney(b.growth, "CAD")}</td>
-                            <td>{formatMoney(b.end, "CAD")}</td>
+                            <td>{formatWholeDollars(b.start)}</td>
+                            <td>{b.contribution > 0 ? formatWholeDollars(b.contribution) : <span className="muted">—</span>}</td>
+                            <td>{b.withdrawal > 0 ? formatWholeDollars(b.withdrawal) : <span className="muted">—</span>}</td>
+                            <td className={b.growth >= 0 ? "positive" : "negative"}>{formatWholeDollars(b.growth)}</td>
+                            <td>{formatWholeDollars(b.end)}</td>
                             <td className={b.roomRemaining !== null && b.roomRemaining <= 0 ? "negative" : ""}>
                               {b.label === "Non-Reg" ? (
                                 <span className="muted">Unlimited</span>
                               ) : b.roomRemaining !== null ? (
-                                formatMoney(b.roomRemaining, "CAD")
+                                formatWholeDollars(b.roomRemaining)
                               ) : (
                                 <span className="muted">—</span>
                               )}
@@ -188,32 +192,27 @@ export function RetirementTable({ years, inputs }: Props) {
                         ))}
                         <tr className="retirement-breakdown-total">
                           <td>Total</td>
-                          <td>{formatMoney(prev.tfsa + prev.rrsp + prev.nonReg, "CAD")}</td>
-                          <td>{formatMoney(totalContribution, "CAD")}</td>
-                          <td>{formatMoney(totalWithdrawal, "CAD")}</td>
-                          <td className={totalGrowth >= 0 ? "positive" : "negative"}>{formatMoney(totalGrowth, "CAD")}</td>
-                          <td>{formatMoney(y.totalBalance, "CAD")}</td>
+                          <td>{formatWholeDollars(prev.tfsa + prev.rrsp + prev.nonReg)}</td>
+                          <td>{formatWholeDollars(totalContribution)}</td>
+                          <td>{formatWholeDollars(totalWithdrawal)}</td>
+                          <td className={totalGrowth >= 0 ? "positive" : "negative"}>{formatWholeDollars(totalGrowth)}</td>
+                          <td>{formatWholeDollars(y.totalBalance)}</td>
                           <td></td>
                         </tr>
                       </tbody>
                     </table>
-                    {inputs.stockReturnMode === "sp500" && (
-                      <p className="retirement-detail-note">
-                        Stock return this year: {formatPercent(y.stockReturnUsed * 100)}
-                      </p>
-                    )}
                     {y.phase === "retirement" && (
                       <p className="retirement-detail-note">
-                        Spending target {formatMoney(y.spendingTarget, "CAD")}
-                        {y.cppIncome + y.oasIncome > 0 && `, CPP+OAS ${formatMoney(y.cppIncome + y.oasIncome, "CAD")}`}
-                        {y.rrifMinimum !== null && `, RRIF minimum ${formatMoney(y.rrifMinimum, "CAD")}`}
-                        , tax paid {formatMoney(y.taxPaid, "CAD")}.
+                        Spending target {formatWholeDollars(y.spendingTarget)}
+                        {y.cppIncome + y.oasIncome > 0 && `, CPP+OAS ${formatWholeDollars(y.cppIncome + y.oasIncome)}`}
+                        {y.rrifMinimum !== null && `, RRIF minimum ${formatWholeDollars(y.rrifMinimum)}`}
+                        , tax paid {formatWholeDollars(y.taxPaid)}.
                       </p>
                     )}
                     {y.rrifExcessReinvested > 0 && (
                       <p className="retirement-detail-note retirement-rrif-excess">
                         RRIF minimum forced a withdrawal above your spending target — the{" "}
-                        {formatMoney(y.rrifExcessReinvested, "CAD")} after-tax surplus was reinvested into Non-Reg.
+                        {formatWholeDollars(y.rrifExcessReinvested)} after-tax surplus was reinvested into Non-Reg.
                       </p>
                     )}
                   </td>
