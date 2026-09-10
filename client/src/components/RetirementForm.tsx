@@ -20,35 +20,35 @@ const PERSONAL_FIELDS: FieldSpec[] = [
 ];
 
 const BALANCE_FIELDS: FieldSpec[] = [
-  { key: "currentTfsaBalance", label: "Current TFSA Balance", suffix: "$" },
-  { key: "currentRrspBalance", label: "Current RRSP Balance", suffix: "$" },
-  { key: "currentNonRegBalance", label: "Current Non-Reg. Balance", suffix: "$" },
+  { key: "currentTfsaBalance", label: "Current TFSA Balance", suffix: "$", step: "10000" },
+  { key: "currentRrspBalance", label: "Current RRSP Balance", suffix: "$", step: "10000" },
+  { key: "currentNonRegBalance", label: "Current Non-Reg. Balance", suffix: "$", step: "10000" },
 ];
 
 const ROOM_FIELDS: FieldSpec[] = [
-  { key: "currentTfsaRoom", label: "Current TFSA Room", suffix: "$" },
-  { key: "currentRrspRoom", label: "Current RRSP Room", suffix: "$" },
-  { key: "annualContribution", label: "Annual Contributions (indexed)", suffix: "$" },
+  { key: "currentTfsaRoom", label: "Current TFSA Room", suffix: "$", step: "10000" },
+  { key: "currentRrspRoom", label: "Current RRSP Room", suffix: "$", step: "10000" },
+  { key: "annualContribution", label: "Annual Contributions (indexed)", suffix: "$", step: "10000" },
 ];
 
 const RETURN_FIELDS: FieldSpec[] = [
-  { key: "stockReturnPreRetirement", label: "Stock Return Pre Retirement", suffix: "%", step: "0.1" },
-  { key: "stockReturnPostRetirement", label: "Stock Return Post Retirement", suffix: "%", step: "0.1" },
-  { key: "bondReturnPostRetirement", label: "Bond Return Post Retirement", suffix: "%", step: "0.1" },
-  { key: "retirementStockPercent", label: "Retirement Stock %", suffix: "%", step: "1" },
-  { key: "inflation", label: "Inflation", suffix: "%", step: "0.1" },
+  { key: "stockReturnPreRetirement", label: "Stock Return Pre Retirement", suffix: "%", step: "0.5" },
+  { key: "stockReturnPostRetirement", label: "Stock Return Post Retirement", suffix: "%", step: "0.5" },
+  { key: "bondReturnPostRetirement", label: "Bond Return Post Retirement", suffix: "%", step: "0.5" },
+  { key: "retirementStockPercent", label: "Retirement Stock %", suffix: "%", step: "5" },
+  { key: "inflation", label: "Inflation", suffix: "%", step: "0.5" },
 ];
 
 const SPENDING_FIELDS: FieldSpec[] = [
-  { key: "retirementSalaryEarly", label: "Retirement Salary (from Retirement)", suffix: "$" },
-  { key: "retirementSalaryLate", label: "Retirement Salary (from Age Below)", suffix: "$" },
+  { key: "retirementSalaryEarly", label: "Retirement Salary (from Retirement)", suffix: "$", step: "10000" },
+  { key: "retirementSalaryLate", label: "Retirement Salary (from Age Below)", suffix: "$", step: "10000" },
   { key: "retirementSalaryLateAge", label: "Reduce Salary At Age" },
 ];
 
 const BENEFIT_FIELDS: FieldSpec[] = [
-  { key: "cppAnnual", label: "CPP (annual, today's $)", suffix: "$" },
+  { key: "cppAnnual", label: "CPP (annual, today's $)", suffix: "$", step: "10000" },
   { key: "cppStartAge", label: "CPP Start Age" },
-  { key: "oasAnnual", label: "OAS (annual, today's $)", suffix: "$" },
+  { key: "oasAnnual", label: "OAS (annual, today's $)", suffix: "$", step: "10000" },
   { key: "oasStartAge", label: "OAS Start Age" },
 ];
 
