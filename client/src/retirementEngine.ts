@@ -197,21 +197,13 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     const rrifFactor = rrifMinimumFactor(age);
     const rrifMinimum = rrifFactor > 0 ? rrsp * rrifFactor : null;
 
-    let remaining = Math.max(0, spendingTarget - baseIncome);
+    // 1. RRIF minimum is mandatory regardless of need — withdraw it first.
+    const forcedRrspWithdrawal = Math.min(Math.max(0, rrifMinimum ?? 0), Math.max(0, rrsp));
+    rrsp -= forcedRrspWithdrawal;
+    const netFromForcedRrsp =
+      forcedRrspWithdrawal - (taxOwed(baseIncome + forcedRrspWithdrawal, brackets) - taxOwed(baseIncome, brackets));
 
-    // 1. Non-registered first (already-taxed balance under the annual mark-to-market model below).
-    const nonRegWithdrawal = Math.min(remaining, Math.max(0, nonReg));
-    nonReg -= nonRegWithdrawal;
-    remaining -= nonRegWithdrawal;
-
-    // 2. RRSP next, grossed up for tax, respecting the RRIF minimum if applicable.
-    let rrspGrossNeeded = grossUpForNet(baseIncome, remaining, brackets);
-    if (rrifMinimum !== null) rrspGrossNeeded = Math.max(rrspGrossNeeded, rrifMinimum);
-    const rrspWithdrawal = Math.min(rrspGrossNeeded, Math.max(0, rrsp));
-    rrsp -= rrspWithdrawal;
-    const incomeTax = taxOwed(baseIncome + rrspWithdrawal, brackets);
-    const netFromRrsp = rrspWithdrawal - (incomeTax - taxOwed(baseIncome, brackets));
-    remaining -= netFromRrsp;
+    let remaining = spendingTarget - baseIncome - netFromForcedRrsp;
     let rrifExcessReinvested = 0;
     if (remaining < 0) {
       // Forced RRIF withdrawal exceeded what was needed — reinvest the after-tax surplus.
@@ -220,7 +212,23 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       remaining = 0;
     }
 
-    // 3. TFSA last.
+    // 2. Non-registered next (already-taxed balance under the annual mark-to-market model below).
+    const nonRegWithdrawal = Math.min(remaining, Math.max(0, nonReg));
+    nonReg -= nonRegWithdrawal;
+    remaining -= nonRegWithdrawal;
+
+    // 3. Additional RRSP beyond the forced minimum, grossed up for tax.
+    const incomeBeforeAdditional = baseIncome + forcedRrspWithdrawal;
+    const additionalRrspGrossNeeded = grossUpForNet(incomeBeforeAdditional, remaining, brackets);
+    const additionalRrspWithdrawal = Math.min(additionalRrspGrossNeeded, Math.max(0, rrsp));
+    rrsp -= additionalRrspWithdrawal;
+    const rrspWithdrawal = forcedRrspWithdrawal + additionalRrspWithdrawal;
+    const incomeTax = taxOwed(incomeBeforeAdditional + additionalRrspWithdrawal, brackets);
+    const netFromAdditionalRrsp =
+      additionalRrspWithdrawal - (incomeTax - taxOwed(incomeBeforeAdditional, brackets));
+    remaining -= netFromAdditionalRrsp;
+
+    // 4. TFSA last.
     const tfsaWithdrawal = Math.min(Math.max(0, remaining), Math.max(0, tfsa));
     tfsa -= tfsaWithdrawal;
     remaining -= tfsaWithdrawal;
