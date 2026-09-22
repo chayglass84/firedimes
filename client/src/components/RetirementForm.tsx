@@ -60,6 +60,11 @@ const BENEFIT_FIELDS: FieldSpec[] = [
   { key: "oasStartAge", label: "OAS Start Age" },
 ];
 
+const DONT_GO_BROKE_FIELDS: FieldSpec[] = [
+  { key: "bareMinimumWithdrawal", label: "Bare Minimum Withdrawal", suffix: "$", step: "5000" },
+  { key: "maxWithdrawalPercent", label: "Max Withdrawal", suffix: "%", step: "0.5" },
+];
+
 export function RetirementForm({ initial, onSimulate }: Props) {
   const [inputs, setInputs] = useState<RetirementInputs>(initial);
 
@@ -153,6 +158,21 @@ export function RetirementForm({ initial, onSimulate }: Props) {
           </label>
         </h3>
         {inputs.includeGovBenefits && <div className="field-row">{BENEFIT_FIELDS.map(renderField)}</div>}
+      </div>
+
+      <div className="retirement-form-section">
+        <h3>
+          Safety Net
+          <label className="toggle-label">
+            <input
+              type="checkbox"
+              checked={inputs.dontGoBroke}
+              onChange={(e) => setInputs((prev) => ({ ...prev, dontGoBroke: e.target.checked }))}
+            />
+            Don't Go Broke
+          </label>
+        </h3>
+        {inputs.dontGoBroke && <div className="field-row">{DONT_GO_BROKE_FIELDS.map(renderField)}</div>}
       </div>
 
       <button className="btn btn-add" type="submit">

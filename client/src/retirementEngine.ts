@@ -65,7 +65,21 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   cppStartAge: 65,
   oasAnnual: 8_600,
   oasStartAge: 65,
+  dontGoBroke: false,
+  bareMinimumWithdrawal: 60_000,
+  maxWithdrawalPercent: 4,
 };
+
+// "Don't Go Broke" safe-withdrawal-rate guardrail: age 90 or under, cap
+// voluntary (non-RRIF, non-CPP/OAS) withdrawals at maxWithdrawalPercent of
+// capital — except the bare minimum (net of CPP/OAS) always gets funded even
+// if that means blowing through the cap.
+const CAUTION_MAX_AGE = 90;
+// A forced bare-minimum withdrawal only turns the "forced" (red) flag on once
+// it draws more than this many percentage points of capital beyond the safe
+// cap — a marginal overage stays "cautious" (amber) instead of reading as a
+// crisis.
+const SEVERE_OVERAGE_POINTS = 1;
 
 // Box-Muller transform for a normally-distributed random draw.
 function randomNormal(mean: number, stdDev: number): number {
@@ -197,10 +211,15 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
         spendingTarget: 0,
         shortfall: 0,
         rrifMinimum: null,
+        rrifForcedWithdrawal: 0,
         rrifExcessReinvested: 0,
         stockReturnUsed: stockRate,
         tfsaRoomRemaining: tfsaRoom,
         rrspRoomRemaining: rrspRoom,
+        effectiveSpendingTarget: 0,
+        bareMinimumTarget: 0,
+        dontGoBrokeCautious: false,
+        dontGoBrokeForced: false,
       });
       continue;
     }
@@ -215,6 +234,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     const salaryBase = age >= inputs.retirementSalaryLateAge ? inputs.retirementSalaryLate : inputs.retirementSalaryEarly;
     const spendingTarget = salaryBase * inflationFactor;
 
+    const totalCapitalStart = tfsa + rrsp + nonReg;
+
     const rrifFactor = rrifMinimumFactor(age);
     const rrifMinimum = rrifFactor > 0 ? rrsp * rrifFactor : null;
 
@@ -224,7 +245,58 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     const netFromForcedRrsp =
       forcedRrspWithdrawal - (taxOwed(baseIncome + forcedRrspWithdrawal, brackets) - taxOwed(baseIncome, brackets));
 
-    let remaining = spendingTarget - baseIncome - netFromForcedRrsp;
+    // "Don't Go Broke": the RRIF minimum (mandatory) and CPP/OAS already cover
+    // part of the year's spending — cap only what's still being voluntarily
+    // withdrawn at maxWithdrawalPercent of capital (the RRIF already drawn
+    // counts against that cap, since it draws down capital the same way a
+    // voluntary withdrawal would), but never below the bare minimum needed
+    // to live, even if that means blowing through the cap.
+    const bareMinimumTarget = inputs.bareMinimumWithdrawal * inflationFactor;
+    const desiredNet = Math.max(0, spendingTarget - baseIncome);
+    let targetNet = desiredNet;
+    let dontGoBrokeCautious = false;
+    let dontGoBrokeForced = false;
+
+    if (inputs.dontGoBroke) {
+      const bareMinNet = Math.max(0, bareMinimumTarget - baseIncome);
+      const withdrawalCap =
+        age <= CAUTION_MAX_AGE
+          ? Math.max(0, totalCapitalStart * (inputs.maxWithdrawalPercent / 100) - forcedRrspWithdrawal)
+          : Infinity;
+
+      // RRIF's after-tax proceeds already fund part of the desired spend —
+      // only the portion still needed beyond that competes for the cap,
+      // otherwise a big RRIF gets charged against the cap twice: once by
+      // eating the cap itself, again by inflating what looks unfunded.
+      const additionalNeededForDesired = Math.max(0, desiredNet - netFromForcedRrsp);
+      if (additionalNeededForDesired > withdrawalCap) {
+        targetNet = netFromForcedRrsp + withdrawalCap;
+        dontGoBrokeCautious = true;
+      }
+
+      if (targetNet < bareMinNet) {
+        targetNet = bareMinNet;
+        // Only a real problem if RRIF + CPP/OAS alone can't cover the bare
+        // minimum and topping up the gap requires exceeding the safe cap —
+        // not just because RRIF happened to be large. And only escalate to
+        // "forced" (red) once the overage is meaningful — a hair over the
+        // cap isn't a crisis just because it's technically over the line.
+        const additionalNeededForBareMin = Math.max(0, bareMinNet - netFromForcedRrsp);
+        if (additionalNeededForBareMin > withdrawalCap) {
+          const effectiveRatePercent = ((baseIncome + targetNet) / totalCapitalStart) * 100;
+          const overagePoints = effectiveRatePercent - inputs.maxWithdrawalPercent;
+          if (overagePoints > SEVERE_OVERAGE_POINTS) {
+            dontGoBrokeForced = true;
+          } else {
+            dontGoBrokeCautious = true;
+          }
+        }
+      }
+    }
+
+    const effectiveSpendingTarget = baseIncome + targetNet;
+
+    let remaining = effectiveSpendingTarget - baseIncome - netFromForcedRrsp;
     let rrifExcessReinvested = 0;
     if (remaining < 0) {
       // Forced RRIF withdrawal exceeded what was needed — reinvest the after-tax surplus.
@@ -299,10 +371,15 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       spendingTarget,
       shortfall,
       rrifMinimum,
+      rrifForcedWithdrawal: forcedRrspWithdrawal,
       rrifExcessReinvested,
       stockReturnUsed: stockRate,
       tfsaRoomRemaining: null,
       rrspRoomRemaining: null,
+      effectiveSpendingTarget,
+      bareMinimumTarget,
+      dontGoBrokeCautious,
+      dontGoBrokeForced,
     });
   }
 

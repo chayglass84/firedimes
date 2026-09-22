@@ -739,3 +739,25 @@ tr.retirement-breakdown-total td {
 .retirement-rrif-excess {
   color: var(--fire-orange);
 }
+
+.withdrawal-cautious {
+  color: var(--fire-yellow);
+  font-weight: 600;
+}
+
+.withdrawal-forced {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.rrif-min-badge {
+  margin-top: 2px;
+  font-size: 0.68rem;
+  color: var(--fire-orange);
+}
+
+.today-dollars-note {
+  margin-top: 2px;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}

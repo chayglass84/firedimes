@@ -107,6 +107,7 @@ export function RetirementTable({ years, inputs }: Props) {
           const totalContribution = breakdown.reduce((sum, b) => sum + b.contribution, 0);
           const totalWithdrawal = breakdown.reduce((sum, b) => sum + b.withdrawal, 0);
           const totalGrowth = breakdown.reduce((sum, b) => sum + b.growth, 0);
+          const inflationFactor = Math.pow(1 + inputs.inflation / 100, y.age - inputs.currentAge);
 
           return (
             <Fragment key={y.year}>
@@ -141,7 +142,22 @@ export function RetirementTable({ years, inputs }: Props) {
                     <span className="muted">—</span>
                   )}
                 </td>
-                <td>
+                <td
+                  className={
+                    y.dontGoBrokeForced
+                      ? "withdrawal-forced"
+                      : y.dontGoBrokeCautious
+                      ? "withdrawal-cautious"
+                      : undefined
+                  }
+                  title={
+                    y.dontGoBrokeForced
+                      ? "Don't Go Broke: exceeded the 10% cap because that's the only way to reach the bare minimum"
+                      : y.dontGoBrokeCautious
+                      ? "Don't Go Broke: spending throttled back to protect capital"
+                      : undefined
+                  }
+                >
                   {y.phase === "retirement" ? (
                     <>
                       {formatWholeDollars(y.withdrawal)}
@@ -176,7 +192,16 @@ export function RetirementTable({ years, inputs }: Props) {
                             <td>{b.label}</td>
                             <td>{formatWholeDollars(b.start)}</td>
                             <td>{b.contribution > 0 ? formatWholeDollars(b.contribution) : <span className="muted">—</span>}</td>
-                            <td>{b.withdrawal > 0 ? formatWholeDollars(b.withdrawal) : <span className="muted">—</span>}</td>
+                            <td>
+                              {b.withdrawal > 0 ? formatWholeDollars(b.withdrawal) : <span className="muted">—</span>}
+                              {b.label === "RRSP" && y.rrifForcedWithdrawal > 0 && (
+                                <div className="rrif-min-badge">
+                                  RRIF min {formatWholeDollars(y.rrifForcedWithdrawal)}
+                                  {y.rrifForcedWithdrawal < b.withdrawal &&
+                                    ` + ${formatWholeDollars(b.withdrawal - y.rrifForcedWithdrawal)} additional`}
+                                </div>
+                              )}
+                            </td>
                             <td className={b.growth >= 0 ? "positive" : "negative"}>{formatWholeDollars(b.growth)}</td>
                             <td>{formatWholeDollars(b.end)}</td>
                             <td className={b.roomRemaining !== null && b.roomRemaining <= 0 ? "negative" : ""}>
@@ -194,7 +219,15 @@ export function RetirementTable({ years, inputs }: Props) {
                           <td>Total</td>
                           <td>{formatWholeDollars(prev.tfsa + prev.rrsp + prev.nonReg)}</td>
                           <td>{formatWholeDollars(totalContribution)}</td>
-                          <td>{formatWholeDollars(totalWithdrawal)}</td>
+                          <td>
+                            {formatWholeDollars(totalWithdrawal)}
+                            {y.phase === "retirement" && totalWithdrawal > 0 && (
+                              <div className="today-dollars-note">
+                                Today: Gross {formatWholeDollars(totalWithdrawal / inflationFactor)}, Net{" "}
+                                {formatWholeDollars((totalWithdrawal - y.taxPaid) / inflationFactor)}
+                              </div>
+                            )}
+                          </td>
                           <td className={totalGrowth >= 0 ? "positive" : "negative"}>{formatWholeDollars(totalGrowth)}</td>
                           <td>{formatWholeDollars(y.totalBalance)}</td>
                           <td></td>
@@ -204,6 +237,7 @@ export function RetirementTable({ years, inputs }: Props) {
                     {y.phase === "retirement" && (
                       <p className="retirement-detail-note">
                         Spending target {formatWholeDollars(y.spendingTarget)}
+                        {inputs.dontGoBroke && `, bare minimum ${formatWholeDollars(y.bareMinimumTarget)}`}
                         {y.cppIncome + y.oasIncome > 0 && `, CPP+OAS ${formatWholeDollars(y.cppIncome + y.oasIncome)}`}
                         {y.rrifMinimum !== null && `, RRIF minimum ${formatWholeDollars(y.rrifMinimum)}`}
                         , tax paid {formatWholeDollars(y.taxPaid)}.
@@ -213,6 +247,19 @@ export function RetirementTable({ years, inputs }: Props) {
                       <p className="retirement-detail-note retirement-rrif-excess">
                         RRIF minimum forced a withdrawal above your spending target — the{" "}
                         {formatWholeDollars(y.rrifExcessReinvested)} after-tax surplus was reinvested into Non-Reg.
+                      </p>
+                    )}
+                    {(y.dontGoBrokeCautious || y.dontGoBrokeForced) && (
+                      <p
+                        className={`retirement-detail-note ${
+                          y.dontGoBrokeForced ? "withdrawal-forced" : "withdrawal-cautious"
+                        }`}
+                      >
+                        Don't Go Broke: spending throttled to {formatWholeDollars(y.effectiveSpendingTarget)} of a{" "}
+                        {formatWholeDollars(y.spendingTarget)} target
+                        {y.dontGoBrokeForced
+                          ? ` — even that exceeded the ${inputs.maxWithdrawalPercent}% cap, but it was the only way to reach the bare minimum.`
+                          : "."}
                       </p>
                     )}
                   </td>

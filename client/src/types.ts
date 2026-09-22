@@ -29,6 +29,9 @@ export interface RetirementInputs {
   cppStartAge: number;
   oasAnnual: number;
   oasStartAge: number;
+  dontGoBroke: boolean;
+  bareMinimumWithdrawal: number;
+  maxWithdrawalPercent: number;
 }
 
 export interface RetirementYearResult {
@@ -53,10 +56,15 @@ export interface RetirementYearResult {
   spendingTarget: number;
   shortfall: number;
   rrifMinimum: number | null;
+  rrifForcedWithdrawal: number;
   rrifExcessReinvested: number;
   stockReturnUsed: number;
   tfsaRoomRemaining: number | null;
   rrspRoomRemaining: number | null;
+  effectiveSpendingTarget: number;
+  bareMinimumTarget: number;
+  dontGoBrokeCautious: boolean;
+  dontGoBrokeForced: boolean;
 }
 
 export interface RetirementSimulationResult {
