@@ -736,6 +736,18 @@ tr.retirement-breakdown-total td {
   margin: 10px 0 0;
 }
 
+table.retirement-net-summary {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  max-width: 360px;
+}
+
+table.retirement-net-summary th:first-child,
+table.retirement-net-summary td:first-child {
+  color: var(--text-dim);
+}
+
 .retirement-rrif-excess {
   color: var(--fire-orange);
 }
@@ -754,10 +766,4 @@ tr.retirement-breakdown-total td {
   margin-top: 2px;
   font-size: 0.68rem;
   color: var(--fire-orange);
-}
-
-.today-dollars-note {
-  margin-top: 2px;
-  font-size: 0.68rem;
-  color: var(--text-dim);
 }

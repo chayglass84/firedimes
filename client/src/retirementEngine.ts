@@ -220,6 +220,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
         bareMinimumTarget: 0,
         dontGoBrokeCautious: false,
         dontGoBrokeForced: false,
+        cppOasNet: 0,
+        rrspWithdrawalNet: 0,
       });
       continue;
     }
@@ -326,6 +328,13 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     tfsa -= tfsaWithdrawal;
     remaining -= tfsaWithdrawal;
 
+    // Net-of-tax attribution, stacked in the same order the income was
+    // taxed: CPP/OAS sits at the bottom of the bracket, so it absorbs the
+    // tax that would otherwise look like it came from a (tax-free) TFSA or
+    // Non-Reg withdrawal just because they landed in the same year.
+    const cppOasNet = baseIncome - taxOwed(baseIncome, brackets);
+    const rrspWithdrawalNet = netFromForcedRrsp + netFromAdditionalRrsp;
+
     const shortfall = Math.max(0, remaining);
     if (shortfall > 0 && ranOutAge === null) ranOutAge = age;
 
@@ -380,6 +389,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       bareMinimumTarget,
       dontGoBrokeCautious,
       dontGoBrokeForced,
+      cppOasNet,
+      rrspWithdrawalNet,
     });
   }
 

@@ -65,6 +65,8 @@ export interface RetirementYearResult {
   bareMinimumTarget: number;
   dontGoBrokeCautious: boolean;
   dontGoBrokeForced: boolean;
+  cppOasNet: number;
+  rrspWithdrawalNet: number;
 }
 
 export interface RetirementSimulationResult {

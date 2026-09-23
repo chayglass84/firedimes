@@ -108,6 +108,13 @@ export function RetirementTable({ years, inputs }: Props) {
           const totalWithdrawal = breakdown.reduce((sum, b) => sum + b.withdrawal, 0);
           const totalGrowth = breakdown.reduce((sum, b) => sum + b.growth, 0);
           const inflationFactor = Math.pow(1 + inputs.inflation / 100, y.age - inputs.currentAge);
+          const netSources = [
+            { label: "CPP+OAS", net: y.cppOasNet },
+            { label: "TFSA", net: y.tfsaWithdrawal },
+            { label: "RRSP", net: y.rrspWithdrawalNet },
+            { label: "Non-Reg", net: y.nonRegWithdrawal },
+          ];
+          const totalNet = netSources.reduce((sum, s) => sum + s.net, 0);
 
           return (
             <Fragment key={y.year}>
@@ -219,21 +226,40 @@ export function RetirementTable({ years, inputs }: Props) {
                           <td>Total</td>
                           <td>{formatWholeDollars(prev.tfsa + prev.rrsp + prev.nonReg)}</td>
                           <td>{formatWholeDollars(totalContribution)}</td>
-                          <td>
-                            {formatWholeDollars(totalWithdrawal)}
-                            {y.phase === "retirement" && totalWithdrawal > 0 && (
-                              <div className="today-dollars-note">
-                                Today: Gross {formatWholeDollars(totalWithdrawal / inflationFactor)}, Net{" "}
-                                {formatWholeDollars((totalWithdrawal - y.taxPaid) / inflationFactor)}
-                              </div>
-                            )}
-                          </td>
+                          <td>{formatWholeDollars(totalWithdrawal)}</td>
                           <td className={totalGrowth >= 0 ? "positive" : "negative"}>{formatWholeDollars(totalGrowth)}</td>
                           <td>{formatWholeDollars(y.totalBalance)}</td>
                           <td></td>
                         </tr>
                       </tbody>
                     </table>
+                    {y.phase === "retirement" && (
+                      <table className="retirement-breakdown retirement-net-summary">
+                        <thead>
+                          <tr>
+                            <th>Net of Tax</th>
+                            <th>This Year</th>
+                            <th>Today's $</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {netSources.map((s) => (
+                            <tr key={s.label}>
+                              <td>{s.label}</td>
+                              <td>{s.net > 0 ? formatWholeDollars(s.net) : <span className="muted">—</span>}</td>
+                              <td>
+                                {s.net > 0 ? formatWholeDollars(s.net / inflationFactor) : <span className="muted">—</span>}
+                              </td>
+                            </tr>
+                          ))}
+                          <tr className="retirement-breakdown-total">
+                            <td>Total</td>
+                            <td>{formatWholeDollars(totalNet)}</td>
+                            <td>{formatWholeDollars(totalNet / inflationFactor)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    )}
                     {y.phase === "retirement" && (
                       <p className="retirement-detail-note">
                         Spending target {formatWholeDollars(y.spendingTarget)}
