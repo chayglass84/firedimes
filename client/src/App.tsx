@@ -87,11 +87,6 @@ export default function App() {
             Retirement
           </button>
         </nav>
-        {tab === "portfolio" && (
-          <button className="btn btn-add-header" onClick={() => setShowAddModal(true)}>
-            + Add Holding
-          </button>
-        )}
       </header>
 
       {tab === "retirement" ? (
@@ -126,9 +121,14 @@ export default function App() {
           <div className="grid-section">
             <h2>
               Holdings
-              <button className="btn btn-refresh" onClick={handleRefresh} disabled={refreshing}>
-                {refreshing ? "Refreshing…" : "Refresh prices"}
-              </button>
+              <span className="header-actions">
+                <button className="btn btn-refresh" onClick={handleRefresh} disabled={refreshing}>
+                  {refreshing ? "Refreshing…" : "Refresh prices"}
+                </button>
+                <button className="btn btn-add-header" onClick={() => setShowAddModal(true)}>
+                  + Add Holding
+                </button>
+              </span>
             </h2>
             <HoldingsGrid holdings={holdings} onDeleteClick={setRemoveTarget} />
           </div>
