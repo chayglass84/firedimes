@@ -21,6 +21,7 @@ export interface RetirementInputs {
   bondReturnPostRetirement: number;
   retirementStockPercent: number;
   inflation: number;
+  inflationStdDev: number;
   retirementSalaryEarly: number;
   retirementSalaryLate: number;
   retirementSalaryLateAge: number;
@@ -59,6 +60,9 @@ export interface RetirementYearResult {
   rrifForcedWithdrawal: number;
   rrifExcessReinvested: number;
   stockReturnUsed: number;
+  inflationUsed: number;
+  // Cumulative price level vs. today (product of every simulated year's inflation).
+  inflationFactor: number;
   tfsaRoomRemaining: number | null;
   rrspRoomRemaining: number | null;
   effectiveSpendingTarget: number;

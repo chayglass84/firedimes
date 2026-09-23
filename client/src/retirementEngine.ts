@@ -57,6 +57,9 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   bondReturnPostRetirement: 3,
   retirementStockPercent: 100,
   inflation: 3,
+  // Canadian CPI since 1990 (OECD/FRED): mean 2.2%, std dev 1.4% (1.2% since
+  // 1992). Only used in S&P 500 mode; Custom mode keeps inflation flat.
+  inflationStdDev: 1.5,
   retirementSalaryEarly: 90_000,
   retirementSalaryLate: 70_000,
   retirementSalaryLateAge: 80,
@@ -80,6 +83,11 @@ const CAUTION_MAX_AGE = 90;
 // cap — a marginal overage stays "cautious" (amber) instead of reading as a
 // crisis.
 const SEVERE_OVERAGE_POINTS = 1;
+
+// Randomized yearly inflation is floored here — Canadian CPI has only dipped
+// below 0.5% in 2 of the 35 years since 1990 (1994, 2009), and never went
+// negative. (Skipped if the user's own mean is already below the floor.)
+const INFLATION_FLOOR = 0.005;
 
 // Box-Muller transform for a normally-distributed random draw.
 function randomNormal(mean: number, stdDev: number): number {
@@ -150,6 +158,7 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
   let tfsaRoom = inputs.currentTfsaRoom;
   let rrspRoom = inputs.currentRrspRoom;
   let ranOutAge: number | null = null;
+  let inflationFactor = 1;
 
   // Each row represents one full elapsed year from today, so the first row
   // (i=0) is age currentAge+1 after a year of growth/contribution — not
@@ -161,13 +170,24 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
   for (let i = 0; i < totalYears; i++) {
     const age = inputs.currentAge + i + 1;
     const year = currentCalendarYear + i + 1;
-    const inflationFactor = Math.pow(1 + inflationRate, i + 1);
     const isRetired = age >= inputs.retirementAge;
+    const isRandom = inputs.stockReturnMode === "sp500";
 
-    const stockRate =
-      inputs.stockReturnMode === "sp500"
-        ? randomNormal(inputs.sp500Mean / 100, inputs.sp500StdDev / 100)
-        : (isRetired ? inputs.stockReturnPostRetirement : inputs.stockReturnPreRetirement) / 100;
+    // Price level compounds year by year so a randomized inflation path
+    // carries through to every inflation-indexed quantity below (limits,
+    // brackets, CPP/OAS, spending). With no randomness this is identical to
+    // (1 + inflation)^(i+1).
+    const inflationUsed = isRandom
+      ? Math.max(
+          Math.min(INFLATION_FLOOR, inflationRate),
+          randomNormal(inflationRate, inputs.inflationStdDev / 100)
+        )
+      : inflationRate;
+    inflationFactor *= 1 + inflationUsed;
+
+    const stockRate = isRandom
+      ? randomNormal(inputs.sp500Mean / 100, inputs.sp500StdDev / 100)
+      : (isRetired ? inputs.stockReturnPostRetirement : inputs.stockReturnPreRetirement) / 100;
 
     if (!isRetired) {
       tfsaRoom += TFSA_ANNUAL_LIMIT * inflationFactor;
@@ -214,6 +234,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
         rrifForcedWithdrawal: 0,
         rrifExcessReinvested: 0,
         stockReturnUsed: stockRate,
+        inflationUsed,
+        inflationFactor,
         tfsaRoomRemaining: tfsaRoom,
         rrspRoomRemaining: rrspRoom,
         effectiveSpendingTarget: 0,
@@ -383,6 +405,8 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
       rrifForcedWithdrawal: forcedRrspWithdrawal,
       rrifExcessReinvested,
       stockReturnUsed: stockRate,
+      inflationUsed,
+      inflationFactor,
       tfsaRoomRemaining: null,
       rrspRoomRemaining: null,
       effectiveSpendingTarget,

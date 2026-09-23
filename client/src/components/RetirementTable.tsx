@@ -68,6 +68,7 @@ export function RetirementTable({ years, inputs }: Props) {
           <th>Total</th>
           <th>Growth</th>
           <th>Stock Return</th>
+          <th>Inflation</th>
           <th>Contribution</th>
           <th>CPP + OAS</th>
           <th>Withdrawal</th>
@@ -107,7 +108,7 @@ export function RetirementTable({ years, inputs }: Props) {
           const totalContribution = breakdown.reduce((sum, b) => sum + b.contribution, 0);
           const totalWithdrawal = breakdown.reduce((sum, b) => sum + b.withdrawal, 0);
           const totalGrowth = breakdown.reduce((sum, b) => sum + b.growth, 0);
-          const inflationFactor = Math.pow(1 + inputs.inflation / 100, y.age - inputs.currentAge);
+          const inflationFactor = y.inflationFactor;
           const netSources = [
             { label: "CPP+OAS", net: y.cppOasNet },
             { label: "TFSA", net: y.tfsaWithdrawal },
@@ -135,6 +136,7 @@ export function RetirementTable({ years, inputs }: Props) {
                 <td className="retirement-total-cell">{formatWholeDollars(y.totalBalance)}</td>
                 <td className={totalGrowth >= 0 ? "positive" : "negative"}>{formatWholeDollars(totalGrowth)}</td>
                 <td>{formatPercent(y.stockReturnUsed * 100)}</td>
+                <td>{formatPercent(y.inflationUsed * 100)}</td>
                 <td>
                   {y.phase === "accumulation" ? (
                     formatWholeDollars(y.contribution)
@@ -180,7 +182,7 @@ export function RetirementTable({ years, inputs }: Props) {
               </tr>
               {isOpen && (
                 <tr className="retirement-detail-row">
-                  <td colSpan={13}>
+                  <td colSpan={14}>
                     <table className="retirement-breakdown">
                       <thead>
                         <tr>
