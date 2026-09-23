@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Holding } from "./types";
 import { addHolding, fetchHoldings, refreshPrices, removeShares } from "./api";
 import { AddHoldingForm } from "./components/AddHoldingForm";
@@ -22,6 +22,30 @@ export default function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<Holding | null>(null);
   const [chartRefreshSignal, setChartRefreshSignal] = useState(0);
+  // Track what's unchecked rather than what's checked, so newly added holdings default to included.
+  const [deselected, setDeselected] = useState<Set<string>>(new Set());
+
+  const selectedHoldings = useMemo(
+    () => holdings.filter((h) => !deselected.has(h.symbol)),
+    [holdings, deselected]
+  );
+  const allSelected = selectedHoldings.length === holdings.length;
+  const chartSymbols = useMemo(
+    () => (allSelected ? undefined : selectedHoldings.map((h) => h.symbol)),
+    [allSelected, selectedHoldings]
+  );
+
+  function toggleSymbol(symbol: string) {
+    setDeselected((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(symbol)) next.add(symbol);
+      return next;
+    });
+  }
+
+  function setAllSelected(selected: boolean) {
+    setDeselected(selected ? new Set() : new Set(holdings.map((h) => h.symbol)));
+  }
 
   const load = useCallback(async () => {
     try {
@@ -95,7 +119,7 @@ export default function App() {
         <>
           {error && <div className="error-banner">{error}</div>}
 
-          <SummaryStrip holdings={holdings} />
+          <SummaryStrip holdings={selectedHoldings} />
 
           <SplitPane
             defaultLeftPercent={66.7}
@@ -106,6 +130,7 @@ export default function App() {
                 defaultRange="1m"
                 pollMs={POLL_INTERVAL_MS}
                 refreshSignal={chartRefreshSignal}
+                symbols={chartSymbols}
               />
             }
             right={
@@ -114,6 +139,7 @@ export default function App() {
                 fixedRange="1d"
                 pollMs={POLL_INTERVAL_MS}
                 refreshSignal={chartRefreshSignal}
+                symbols={chartSymbols}
               />
             }
           />
@@ -130,7 +156,13 @@ export default function App() {
                 </button>
               </span>
             </h2>
-            <HoldingsGrid holdings={holdings} onDeleteClick={setRemoveTarget} />
+            <HoldingsGrid
+              holdings={holdings}
+              deselected={deselected}
+              onToggleSymbol={toggleSymbol}
+              onSetAllSelected={setAllSelected}
+              onDeleteClick={setRemoveTarget}
+            />
           </div>
         </>
       )}

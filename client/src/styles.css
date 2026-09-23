@@ -483,6 +483,21 @@ table.holdings-grid tr:last-child td {
   border-bottom: none;
 }
 
+table.holdings-grid th.select-col,
+table.holdings-grid td.select-col {
+  width: 1%;
+  padding-right: 4px;
+}
+
+table.holdings-grid .select-col input {
+  accent-color: var(--fire-orange);
+  cursor: pointer;
+}
+
+table.holdings-grid tr.deselected td:not(.select-col):not(:last-child) {
+  opacity: 0.4;
+}
+
 td.symbol-cell {
   font-weight: 700;
   letter-spacing: 0.03em;

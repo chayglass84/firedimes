@@ -18,6 +18,8 @@ interface Props {
   defaultRange?: string;
   pollMs: number;
   refreshSignal?: number;
+  /** Subset of symbols to chart; undefined = whole portfolio. */
+  symbols?: string[];
 }
 
 export function PerformanceChartCard({
@@ -27,14 +29,18 @@ export function PerformanceChartCard({
   defaultRange = "1m",
   pollMs,
   refreshSignal,
+  symbols,
 }: Props) {
   const [range, setRange] = useState(fixedRange ?? defaultRange);
   const [points, setPoints] = useState<PortfolioPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async (r: string) => {
+  // Stable dependency so a new-but-equal array doesn't retrigger the fetch.
+  const symbolsKey = symbols ? symbols.join(",") : null;
+
+  const load = useCallback(async (r: string, key: string | null) => {
     try {
-      const data = await fetchPortfolioHistory(r);
+      const data = await fetchPortfolioHistory(r, key === null ? undefined : key.split(",").filter(Boolean));
       setPoints(data);
       setError(null);
     } catch (err) {
@@ -43,10 +49,10 @@ export function PerformanceChartCard({
   }, []);
 
   useEffect(() => {
-    load(range);
-    const id = setInterval(() => load(range), pollMs);
+    load(range, symbolsKey);
+    const id = setInterval(() => load(range, symbolsKey), pollMs);
     return () => clearInterval(id);
-  }, [range, load, pollMs, refreshSignal]);
+  }, [range, symbolsKey, load, pollMs, refreshSignal]);
 
   const first = points[0]?.v;
   const last = points[points.length - 1]?.v;

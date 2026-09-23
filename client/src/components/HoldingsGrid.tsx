@@ -1,9 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Holding } from "../types";
 import { formatMoney, formatPercent, formatSignedMoney } from "../format";
 
 interface Props {
   holdings: Holding[];
+  deselected: ReadonlySet<string>;
+  onToggleSymbol: (symbol: string) => void;
+  onSetAllSelected: (selected: boolean) => void;
   onDeleteClick: (holding: Holding) => void;
 }
 
@@ -84,9 +87,24 @@ function TrashIcon() {
   );
 }
 
-export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
+export function HoldingsGrid({
+  holdings,
+  deselected,
+  onToggleSymbol,
+  onSetAllSelected,
+  onDeleteClick,
+}: Props) {
   const [sortKey, setSortKey] = useState<SortKey>("marketValueCad");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const selectedCount = holdings.filter((h) => !deselected.has(h.symbol)).length;
+  const allSelected = holdings.length > 0 && selectedCount === holdings.length;
+  const selectAllRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = selectedCount > 0 && !allSelected;
+    }
+  }, [selectedCount, allSelected]);
 
   const sorted = useMemo(() => {
     const copy = [...holdings];
@@ -128,6 +146,15 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
     <table className="holdings-grid">
       <thead>
         <tr>
+          <th className="select-col">
+            <input
+              ref={selectAllRef}
+              type="checkbox"
+              aria-label="Select all holdings"
+              checked={allSelected}
+              onChange={() => onSetAllSelected(!allSelected)}
+            />
+          </th>
           {COLUMNS.map((col) => (
             <th key={col.key} className="sortable" onClick={() => handleHeaderClick(col)}>
               {col.label}
@@ -139,7 +166,15 @@ export function HoldingsGrid({ holdings, onDeleteClick }: Props) {
       </thead>
       <tbody>
         {sorted.map((h) => (
-          <tr key={h.symbol}>
+          <tr key={h.symbol} className={deselected.has(h.symbol) ? "deselected" : ""}>
+            <td className="select-col">
+              <input
+                type="checkbox"
+                aria-label={`Include ${h.symbol}`}
+                checked={!deselected.has(h.symbol)}
+                onChange={() => onToggleSymbol(h.symbol)}
+              />
+            </td>
             <td className="symbol-cell">
               {h.instrumentType === "EQUITY" ? (
                 <a

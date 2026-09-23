@@ -32,8 +32,10 @@ export function refreshPrices(): Promise<void> {
   return fetch("/api/refresh", { method: "POST" }).then((res) => handle(res));
 }
 
-export function fetchPortfolioHistory(range: string): Promise<PortfolioPoint[]> {
-  return fetch(`/api/portfolio-history?range=${encodeURIComponent(range)}`).then((res) =>
+/** `symbols` undefined = whole portfolio (uses the recorded totals). */
+export function fetchPortfolioHistory(range: string, symbols?: string[]): Promise<PortfolioPoint[]> {
+  const symbolsParam = symbols ? `&symbols=${encodeURIComponent(symbols.join(","))}` : "";
+  return fetch(`/api/portfolio-history?range=${encodeURIComponent(range)}${symbolsParam}`).then((res) =>
     handle<PortfolioPoint[]>(res)
   );
 }
