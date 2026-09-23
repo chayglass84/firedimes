@@ -554,6 +554,123 @@ td.symbol-cell {
   height: auto;
 }
 
+/* Monte Carlo outcome bar chart */
+.outcome-chart {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.outcome-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 4px 8px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.outcome-col:hover:not(:disabled) {
+  background: rgba(255, 138, 31, 0.06);
+}
+
+.outcome-col.selected {
+  border-color: var(--fire-orange);
+  background: rgba(255, 138, 31, 0.1);
+}
+
+.outcome-col:disabled {
+  cursor: default;
+}
+
+/* Bars hang from the bottom; bar height is set inline in px and the % label
+   stacks above it, so a tiny bar still gets a full-size label. */
+.outcome-track {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 250px;
+}
+
+.outcome-pct {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding-bottom: 4px;
+}
+
+.outcome-col.empty .outcome-pct {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.outcome-bar {
+  display: block;
+  width: 70%;
+  border-radius: 4px 4px 0 0;
+}
+
+.outcome-label {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.outcome-col.selected .outcome-label {
+  color: var(--text);
+}
+
+@media (max-width: 700px) {
+  .outcome-chart {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.bucket-summary-strip {
+  margin: 12px 0;
+}
+
+.run-list-wrap {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+table.run-list th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-panel);
+}
+
+tr.run-row {
+  cursor: pointer;
+}
+
+tr.run-row:hover td {
+  background: rgba(255, 138, 31, 0.06);
+}
+
+tr.run-row.selected td {
+  background: rgba(255, 138, 31, 0.14);
+}
+
+.retirement-run-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  scroll-margin-top: 12px;
+}
+
+.run-detail-title {
+  font-size: 1rem;
+  color: var(--gold);
+  margin: 0;
+}
+
 .retirement-form-section {
   margin-bottom: 16px;
 }

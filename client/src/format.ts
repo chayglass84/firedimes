@@ -13,6 +13,11 @@ export function formatPercent(value: number | null): string {
   return `${sign}${value.toFixed(2)}%`;
 }
 
+// A share out of 100 with at most one decimal and no trailing ".0" ("17%", "0.3%").
+export function formatShare(value: number): string {
+  return `${Math.round(value * 10) / 10}%`;
+}
+
 export function formatSignedMoney(value: number | null, currency: string | null = "USD"): string {
   if (value === null) return "—";
   const sign = value > 0 ? "+" : "";

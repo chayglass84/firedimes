@@ -14,6 +14,8 @@ export interface RetirementInputs {
   currentRrspRoom: number;
   annualContribution: number;
   stockReturnMode: "custom" | "sp500";
+  // Monte Carlo trial count; only used in S&P 500 mode (custom is deterministic).
+  iterations: number;
   stockReturnPreRetirement: number;
   stockReturnPostRetirement: number;
   sp500Mean: number;

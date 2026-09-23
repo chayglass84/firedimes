@@ -45,6 +45,7 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   currentRrspRoom: 60_000,
   annualContribution: 50_000,
   stockReturnMode: "custom",
+  iterations: 100,
   stockReturnPreRetirement: 7,
   stockReturnPostRetirement: 6,
   // "S&P 500 (Historical)" mode defaults, editable by the user. Deliberately

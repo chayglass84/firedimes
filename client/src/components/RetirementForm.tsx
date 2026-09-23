@@ -36,6 +36,10 @@ const STOCK_RETURN_FIELDS: FieldSpec[] = [
   { key: "stockReturnPostRetirement", label: "Stock Return Post Retirement", suffix: "%", step: "0.5" },
 ];
 
+// step "any": trial counts are typed freely (250, 500...), and a fixed step
+// would make the browser reject values that aren't multiples of it on submit.
+const ITERATIONS_FIELD: FieldSpec = { key: "iterations", label: "Iterations", step: "any" };
+
 const SP500_FIELDS: FieldSpec[] = [
   { key: "sp500Mean", label: "Mean (Stock Return)", suffix: "%", step: "0.5" },
   { key: "sp500StdDev", label: "Std Dev (Stock Return)", suffix: "%", step: "0.5" },
@@ -141,6 +145,7 @@ export function RetirementForm({ initial, onSimulate }: Props) {
               <option value="sp500">S&amp;P 500 (Historical)</option>
             </select>
           </div>
+          {inputs.stockReturnMode === "sp500" && renderField(ITERATIONS_FIELD)}
         </div>
         <div className="field-grid">
           {inputs.stockReturnMode === "custom"
