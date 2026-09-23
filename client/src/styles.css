@@ -256,6 +256,18 @@ header.app-header img {
   flex-wrap: wrap;
 }
 
+/* Fixed 3-column grid so fields line up across rows regardless of how many
+   each row has (unlike .field-row, which stretches to fill). */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.field-grid + .field-grid {
+  margin-top: 10px;
+}
+
 .field {
   display: flex;
   flex-direction: column;

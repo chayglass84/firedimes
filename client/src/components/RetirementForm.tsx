@@ -39,14 +39,20 @@ const STOCK_RETURN_FIELDS: FieldSpec[] = [
 const SP500_FIELDS: FieldSpec[] = [
   { key: "sp500Mean", label: "Mean (Stock Return)", suffix: "%", step: "0.5" },
   { key: "sp500StdDev", label: "Std Dev (Stock Return)", suffix: "%", step: "0.5" },
+];
+
+// Custom mode has a single flat inflation rate; S&P 500 mode treats it as the
+// mean of a random process and adds a std dev and year-to-year persistence.
+const INFLATION_FIELD: FieldSpec = { key: "inflation", label: "Inflation", suffix: "%", step: "0.5" };
+const INFLATION_RANDOM_FIELDS: FieldSpec[] = [
+  { ...INFLATION_FIELD, label: "Mean (Inflation)" },
   { key: "inflationStdDev", label: "Std Dev (Inflation)", suffix: "%", step: "0.5" },
   { key: "inflationPersistence", label: "Persistence (Inflation)", step: "0.1" },
 ];
 
-const OTHER_RETURN_FIELDS: FieldSpec[] = [
+const ALLOCATION_FIELDS: FieldSpec[] = [
+  { key: "retirementStockPercent", label: "Retirement Stock", suffix: "%", step: "5" },
   { key: "bondReturnPostRetirement", label: "Bond Return Post Retirement", suffix: "%", step: "0.5" },
-  { key: "retirementStockPercent", label: "Retirement Stock %", suffix: "%", step: "5" },
-  { key: "inflation", label: "Inflation", suffix: "%", step: "0.5" },
 ];
 
 const SPENDING_FIELDS: FieldSpec[] = [
@@ -116,7 +122,7 @@ export function RetirementForm({ initial, onSimulate }: Props) {
 
       <div className="retirement-form-section">
         <h3>Returns &amp; Inflation</h3>
-        <div className="field-row">
+        <div className="field-grid">
           <div className="field">
             <label htmlFor="ret-stockReturnMode">Stock Return Basis</label>
             <select
@@ -135,11 +141,18 @@ export function RetirementForm({ initial, onSimulate }: Props) {
               <option value="sp500">S&amp;P 500 (Historical)</option>
             </select>
           </div>
+        </div>
+        <div className="field-grid">
           {inputs.stockReturnMode === "custom"
             ? STOCK_RETURN_FIELDS.map(renderField)
             : SP500_FIELDS.map(renderField)}
         </div>
-        <div className="field-row">{OTHER_RETURN_FIELDS.map(renderField)}</div>
+        <div className="field-grid">
+          {inputs.stockReturnMode === "custom"
+            ? renderField(INFLATION_FIELD)
+            : INFLATION_RANDOM_FIELDS.map(renderField)}
+        </div>
+        <div className="field-grid">{ALLOCATION_FIELDS.map(renderField)}</div>
       </div>
 
       <div className="retirement-form-section">
