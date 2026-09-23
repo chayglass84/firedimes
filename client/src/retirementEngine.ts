@@ -60,6 +60,10 @@ export const DEFAULT_RETIREMENT_INPUTS: RetirementInputs = {
   // Canadian CPI since 1990 (OECD/FRED): mean 2.2%, std dev 1.4% (1.2% since
   // 1992). Only used in S&P 500 mode; Custom mode keeps inflation flat.
   inflationStdDev: 1.5,
+  // Year-to-year carry-over of inflation surprises (AR(1) coefficient), 0 =
+  // independent draws. Lag-1 autocorrelation of Canadian CPI 1990-2024 is ~0.4
+  // (the calm 1995-2019 era alone is 0.12, but that excludes 2021-23).
+  inflationPersistence: 0.4,
   retirementSalaryEarly: 90_000,
   retirementSalaryLate: 70_000,
   retirementSalaryLateAge: 80,
@@ -160,6 +164,17 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
   let ranOutAge: number | null = null;
   let inflationFactor = 1;
 
+  // Inflation follows an AR(1) process around the input mean so surprises
+  // cluster (2021-23) but revert instead of random-walking over 54 years. The
+  // noise is scaled by sqrt(1 - phi^2) so the long-run std dev stays at
+  // inflationStdDev regardless of persistence. The first year is drawn from
+  // that stationary distribution; the state carried forward is the unclipped
+  // value, so the floor doesn't feed back into later years.
+  const phi = Math.min(0.99, Math.max(0, inputs.inflationPersistence));
+  const inflationStdDev = inputs.inflationStdDev / 100;
+  const innovationStdDev = inflationStdDev * Math.sqrt(1 - phi * phi);
+  let inflationState: number | null = null;
+
   // Each row represents one full elapsed year from today, so the first row
   // (i=0) is age currentAge+1 after a year of growth/contribution — not
   // currentAge itself, which is the (unshown) starting point.
@@ -177,12 +192,14 @@ export function simulateRetirement(inputs: RetirementInputs): RetirementSimulati
     // carries through to every inflation-indexed quantity below (limits,
     // brackets, CPP/OAS, spending). With no randomness this is identical to
     // (1 + inflation)^(i+1).
-    const inflationUsed = isRandom
-      ? Math.max(
-          Math.min(INFLATION_FLOOR, inflationRate),
-          randomNormal(inflationRate, inputs.inflationStdDev / 100)
-        )
-      : inflationRate;
+    let inflationUsed = inflationRate;
+    if (isRandom) {
+      inflationState =
+        inflationState === null
+          ? randomNormal(inflationRate, inflationStdDev)
+          : inflationRate + phi * (inflationState - inflationRate) + randomNormal(0, innovationStdDev);
+      inflationUsed = Math.max(Math.min(INFLATION_FLOOR, inflationRate), inflationState);
+    }
     inflationFactor *= 1 + inflationUsed;
 
     const stockRate = isRandom

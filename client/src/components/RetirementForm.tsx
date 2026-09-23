@@ -40,6 +40,7 @@ const SP500_FIELDS: FieldSpec[] = [
   { key: "sp500Mean", label: "Mean (Stock Return)", suffix: "%", step: "0.5" },
   { key: "sp500StdDev", label: "Std Dev (Stock Return)", suffix: "%", step: "0.5" },
   { key: "inflationStdDev", label: "Std Dev (Inflation)", suffix: "%", step: "0.5" },
+  { key: "inflationPersistence", label: "Persistence (Inflation)", step: "0.1" },
 ];
 
 const OTHER_RETURN_FIELDS: FieldSpec[] = [

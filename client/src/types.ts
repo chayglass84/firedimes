@@ -22,6 +22,7 @@ export interface RetirementInputs {
   retirementStockPercent: number;
   inflation: number;
   inflationStdDev: number;
+  inflationPersistence: number;
   retirementSalaryEarly: number;
   retirementSalaryLate: number;
   retirementSalaryLateAge: number;
