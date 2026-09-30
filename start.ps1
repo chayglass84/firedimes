@@ -19,6 +19,8 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $serverDir = Join-Path $root "server"
 $url = "http://localhost:4000"
+$logDir = Join-Path $root "logs"
+$logFile = Join-Path $logDir "server.log"
 
 function Test-ServerRunning {
     try {
@@ -34,8 +36,14 @@ if (-not (Test-ServerRunning)) {
     npm run build --workspace=client | Out-Null
     Pop-Location
 
+    New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+    Add-Content -Path $logFile -Value "===== [$(Get-Date -Format o)] start.ps1 launching server ====="
+
+    # Runs npm in the foreground of this cmd instance (so we can log its exit),
+    # appending stdout+stderr to the log file, then logs the exit code once it dies.
+    $cmdLine = "npm run start >> `"$logFile`" 2>&1 & echo [%date% %time%] server process exited with code %errorlevel% >> `"$logFile`""
     Start-Process -FilePath "cmd.exe" `
-        -ArgumentList "/c", "npm run start" `
+        -ArgumentList "/c", $cmdLine `
         -WorkingDirectory $serverDir `
         -WindowStyle Hidden
 
