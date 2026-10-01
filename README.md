@@ -1,8 +1,10 @@
 # Fire Dimes
 
-A simple local portfolio dashboard. Add holdings by symbol/shares/price, prices
-refresh every 10 minutes while the app is open (via Yahoo Finance's free
-quote endpoint), and everything is stored in a local SQLite database.
+A local personal-finance dashboard with two tabs: a **Portfolio** tracker
+that polls live prices for your holdings, and a **Retirement** planner that
+Monte Carlo-simulates a Canadian (Manitoba) FIRE scenario year by year —
+TFSA/RRSP/non-registered accounts, tax brackets, RRIF minimums, CPP/OAS, the
+works. Everything is stored in a local SQLite database.
 
 ## Running it
 
@@ -10,7 +12,8 @@ quote endpoint), and everything is stored in a local SQLite database.
 builds the client if needed, starts the server if it isn't already running
 (one process, serving both the API and the built UI), and opens
 http://localhost:4000 in your default browser. Safe to run again any time —
-it won't start a second server if one's already up.
+it won't start a second server if one's already up. Server stdout/stderr and
+exit code are logged to `server.log` for crash diagnosis.
 
 **Auto-start at login:** a shortcut was added to your Windows Startup folder
 (`shell:startup` → "Fire Dimes.lnk") that runs `start.ps1 -NoBrowser` silently
@@ -40,13 +43,17 @@ calls to the backend on port 4000.
 - Cost basis: adding shares to an existing holding computes a new weighted
   average cost. Removing shares reduces the share count only — average cost
   is left unchanged.
+- The Retirement tab is entirely client-side (no persistence) — every
+  simulation runs in the browser from whatever is currently in the form.
 
-## Features
+## Portfolio tab
 
 - **Holdings grid** — sortable by any column (click a header), defaults to
   Market Value descending. Market Value and Today's Change sort by dollar
   amount, not percent. Market Value shows total gain % alongside the dollar
-  figure, color-coded like Today's Change.
+  figure, color-coded like Today's Change. Each row has a checkbox; unchecking
+  holdings filters them out of the summary strip and both performance charts
+  below (a header checkbox selects/deselects all).
 - **Forecast column** — median analyst 12-month price target per stock
   (see "Analyst forecasts" below). Shows "n/a" for ETFs and thinly-covered
   stocks.
@@ -57,9 +64,9 @@ calls to the backend on port 4000.
   (drag the divider; defaults 2/3 left). Left: "Overall Performance",
   filterable 1D/1W/1M/3M. Right: "Daily Performance", today's 10-min data
   only. Both use a neutral fire-gradient line (not green/red), with simple
-  axes and a hover tooltip.
+  axes and a hover tooltip, and both respect the holdings checkboxes above.
 
-## Notes
+### Notes
 
 - Prices come from Yahoo Finance's unauthenticated chart endpoint. No API
   key, but it's unofficial and can occasionally fail or rate-limit — the
@@ -74,7 +81,7 @@ calls to the backend on port 4000.
   the *current* rate, including for cost basis — so total gain includes
   some currency-movement effect for USD holdings, not just price movement.
 
-## Analyst forecasts
+### Analyst forecasts
 
 The Forecast column is the **median** analyst 12-month price target, sourced
 from Yahoo's `quoteSummary` endpoint (`financialData.targetMedianPrice`) —
@@ -89,3 +96,57 @@ request — see `server/src/analystTarget.ts`. Both are long-lived and
 reused across all symbols; the session is only re-established if a request
 comes back unauthorized. Targets are re-checked once per calendar day per
 symbol (not every 10-min poll) since they move far less often than price.
+
+## Retirement tab
+
+A year-by-year FIRE simulator (`client/src/retirementEngine.ts`), built
+around Manitoba tax rules, that models accumulation and drawdown from today
+out to a target age. One click either runs a single deterministic
+projection or, in randomized mode, a batch of Monte Carlo trials.
+
+**Form sections:** Timeline (current/retirement/live-until age); Current
+Balances (TFSA/RRSP/non-reg); Contribution Room & Savings (TFSA/RRSP room,
+annual contribution — all inflation-indexed); Returns & Inflation; Retirement
+Spending (today's-dollars target that steps down at a chosen age);
+Government Benefits (CPP/OAS amount and start age, toggleable); and a
+"Don't Go Broke" guardrail section.
+
+- **Accumulation phase** — each year's contribution fills TFSA room first,
+  then RRSP room, then spills into the non-registered account; room grows
+  with the TFSA/RRSP annual limits indexed to inflation.
+- **Retirement drawdown order** — RRIF minimum withdrawal (mandatory from
+  age 71, by CRA prescribed factor) first, then non-registered, then
+  additional RRSP (grossed up for tax), then TFSA last. CPP/OAS layer on top
+  once each starts. Non-registered growth is taxed annually as realized
+  capital gains (a simplification that avoids decades of cost-basis
+  tracking) rather than tracked lot-by-lot.
+- **Tax** — approximate combined federal + Manitoba marginal brackets
+  (~2024 rates), indexed to inflation each simulated year.
+- **Returns & inflation — two modes:**
+  - *Custom*: fixed pre-/post-retirement stock return, fixed bond return,
+    flat inflation, a retirement stock/bond split.
+  - *S&P 500 (Historical)*: each simulated year draws a random stock return
+    (normal, user-set mean/std dev) and a random inflation rate that follows
+    an AR(1) process (mean-reverting with configurable year-to-year
+    persistence, floored so it doesn't go unrealistically negative) instead
+    of a flat rate. Selecting this mode with more than 1 iteration runs a
+    Monte Carlo batch instead of a single projection.
+- **"Don't Go Broke" guardrail** (optional) — caps voluntary withdrawals at
+  a safe-withdrawal-rate percent of capital once the RRIF minimum and
+  CPP/OAS are accounted for, while always funding a bare-minimum spending
+  floor even if that means exceeding the cap. The year-by-year table flags
+  years as cautious (amber, over the safe cap) or forced (red, materially
+  over it to meet the bare minimum). The guardrail is a withdrawal cap only
+  — it does not model delaying retirement or cutting spending in response
+  to bad outcomes, so a bad run is shown as a bad run, not quietly rescued.
+- **Monte Carlo mode** — runs up to 1,000 independent trials, buckets each
+  by outcome (five-year "broke by" bands up to Live Until, "Barely Made It"
+  for survivors with under 5 years of spending runway left, or "Made It"),
+  and shows an outcome-distribution chart plus headline stats (% went broke,
+  median balance at retirement, median final balance). Click a bucket to see
+  its runs worst-first, then click a run to drill into its full year-by-year
+  detail (balance chart + table), identical to a single deterministic run.
+
+All of this (tax brackets, RRIF factors, inflation assumptions, the
+guardrail) is for retirement-planning estimates only — not a substitute for
+real tax or financial advice.
